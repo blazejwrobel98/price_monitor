@@ -98,3 +98,57 @@ export async function checkNow(id: number): Promise<{
   const res = await fetch(`${base}/api/products/${id}/check`, { method: "POST" });
   return parseJson(res);
 }
+
+async function errorBody(res: Response): Promise<string> {
+  const t = await res.text();
+  try {
+    const j = JSON.parse(t) as { detail?: unknown };
+    if (typeof j.detail === "string") return j.detail;
+    if (Array.isArray(j.detail)) {
+      return j.detail.map((x: { msg?: string }) => x.msg ?? "").filter(Boolean).join("; ");
+    }
+  } catch {
+    /* not JSON */
+  }
+  return t || res.statusText;
+}
+
+export async function downloadBackupFile(): Promise<void> {
+  const res = await fetch(`${base}/api/settings/backup`);
+  if (!res.ok) {
+    throw new Error(await errorBody(res));
+  }
+  const blob = await res.blob();
+  let name = `price-monitor-backup-${new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)}.db`;
+  const cd = res.headers.get("Content-Disposition");
+  if (cd) {
+    const m =
+      /filename\*=UTF-8''([^;\s]+)|filename="([^"]+)"|filename=([^;\s]+)/i.exec(cd);
+    const raw = (m?.[1] || m?.[2] || m?.[3] || "").trim();
+    if (raw) {
+      try {
+        name = decodeURIComponent(raw.replace(/^["']|["']$/g, ""));
+      } catch {
+        name = raw.replace(/^["']|["']$/g, "");
+      }
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function restoreBackupFile(file: File): Promise<void> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${base}/api/settings/backup`, {
+    method: "POST",
+    body: fd,
+  });
+  if (!res.ok) {
+    throw new Error(await errorBody(res));
+  }
+}

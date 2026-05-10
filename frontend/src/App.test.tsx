@@ -22,7 +22,7 @@ describe("Dashboard", () => {
         <Dashboard />
       </BrowserRouter>,
     );
-    expect(screen.getByText("Price Monitor")).toBeInTheDocument();
+    expect(screen.getByText("Produkty")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText(/Nie masz jeszcze żadnego produktu/i)).toBeInTheDocument();
     });

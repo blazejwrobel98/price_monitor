@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine.url import make_url
 
 
 class Settings(BaseSettings):
@@ -16,7 +17,18 @@ class Settings(BaseSettings):
 
     @property
     def sqlite_path(self) -> Path:
+        """Default SQLite file path when DATABASE_URL is not set."""
         return self.data_dir / "prices.db"
+
+    @property
+    def sqlite_filesystem_path(self) -> Path:
+        """Absolute filesystem path to the SQLite DB used by the app."""
+        u = make_url(self.resolved_database_url)
+        if u.drivername != "sqlite" or not u.database:
+            raise ValueError("Expected a SQLite database URL with a filesystem path.")
+        if u.database == ":memory:":
+            raise ValueError("In-memory SQLite has no filesystem path.")
+        return Path(u.database)
 
     @property
     def resolved_database_url(self) -> str:

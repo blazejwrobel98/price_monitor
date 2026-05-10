@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from price_monitor.api.backup import router as backup_router
 from price_monitor.api.health import router as health_router
 from price_monitor.api.products import router as products_router
 from price_monitor.config import Settings
@@ -32,9 +33,10 @@ async def lifespan(app: FastAPI):
     def rebuild_scheduler() -> None:
         if not settings.scheduler_enabled:
             return
-        schedule_product_jobs(scheduler, session_factory, settings)
+        schedule_product_jobs(app.state.scheduler, app.state.session_factory, settings)
 
     app.state.settings = settings
+    app.state.engine = engine
     app.state.session_factory = session_factory
     app.state.scheduler = scheduler
     app.state.rebuild_scheduler = rebuild_scheduler
@@ -48,8 +50,10 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    if scheduler.running:
-        scheduler.shutdown(wait=False)
+    sched = app.state.scheduler
+    if sched.running:
+        sched.shutdown(wait=False)
+    app.state.engine.dispose()
 
 
 def create_app() -> FastAPI:
@@ -62,6 +66,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(health_router, prefix="/api")
+    app.include_router(backup_router, prefix="/api")
     app.include_router(products_router, prefix="/api")
 
     if STATIC_DIR.is_dir():

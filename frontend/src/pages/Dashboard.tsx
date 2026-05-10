@@ -86,10 +86,9 @@ export function Dashboard() {
           <p className="text-sm font-medium uppercase tracking-widest text-emerald-400/90">
             Self-hosted
           </p>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-white">Price Monitor</h1>
+          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-white">Produkty</h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">
-            Śledź ceny produktów po URL i selektorze CSS. Historia jest zapisywana lokalnie — idealnie
-            pod własny serwer lub kontener.
+            Śledź ceny po URL i selektorze CSS. Historia zapisuje się lokalnie w bazie SQLite.
           </p>
         </div>
         <button

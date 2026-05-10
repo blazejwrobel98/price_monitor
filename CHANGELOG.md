@@ -7,6 +7,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 ### Dodano
 
 - Automatyczne migracje bazy (**Alembic**): przy starcie aplikacji wykonywane jest `upgrade` do najnowszego schematu; istniejące bazy utworzone wcześniej przez `create_all` są jednorazowo „stemplowane”, żeby nie duplikować tabel.
+- Panel boczny (zwijany do samych ikon, stan w `localStorage`) oraz strona **Ustawienia**: pobieranie kopii SQLite, wgrywanie i przywracanie bazy.
 
 ## [0.0.1] - 2026-05-10
 
