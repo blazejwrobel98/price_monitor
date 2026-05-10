@@ -6,7 +6,7 @@ Self‑hosted monitor cen produktów z **historią sprawdzeń** i nowoczesnym pa
 
 **Kopia zapasowa:** w aplikacji (menu **Ustawienia**) możesz pobrać plik `.db` albo wgrać wcześniejszą kopię (nadpisuje bieżącą bazę).
 
-**Wersja:** `0.0.2` (zobacz plik [`VERSION`](./VERSION) oraz [`CHANGELOG.md`](./CHANGELOG.md)).
+**Wersja:** `0.0.3` (zobacz plik [`VERSION`](./VERSION) oraz [`CHANGELOG.md`](./CHANGELOG.md)).
 
 ## Możliwości
 
@@ -75,15 +75,15 @@ Zobacz [`.env.example`](./.env.example). Tylko gdy musisz zmienić port: `PRICE_
 Obraz buduje frontend i osadza go w backendzie (FastAPI serwuje statyczne pliki SPA).
 
 ```bash
-docker build -t price-monitor:0.0.2 .
-docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.2
+docker build -t price-monitor:0.0.3 .
+docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.3
 ```
 
 ## Wydania i wersjonowanie
 
 - Numer wersji trzymamy w [`VERSION`](./VERSION) oraz w `backend/pyproject.toml` i `frontend/package.json` (oraz `package-lock.json`).
 - Zmiany opisujemy w [`CHANGELOG.md`](./CHANGELOG.md).
-- Tag Git `v0.0.2` + workflow [`.github/workflows/release.yml`](./.github/workflows/release.yml) buduje i publikuje obraz do **GitHub Container Registry** (`ghcr.io/<właściciel>/<repo>` w małych literach). Przy każdym tagu wersji workflow nadaje też tag **`latest`** (obok semver, np. `0.0.2`) — wygodnie: `docker pull ghcr.io/<właściciel>/<repo>:latest`. Ten sam workflow **tworzy [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)** z notatkami (auto) dla tagu `v*.*.*`.
+- Tag Git `v0.0.3` + workflow [`.github/workflows/release.yml`](./.github/workflows/release.yml) buduje i publikuje obraz do **GitHub Container Registry** (`ghcr.io/<właściciel>/<repo>` w małych literach). Przy każdym tagu wersji workflow nadaje też tag **`latest`** (obok semver, np. `0.0.3`) — wygodnie: `docker pull ghcr.io/<właściciel>/<repo>:latest`. Ten sam workflow **tworzy [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)** z notatkami (auto) dla tagu `v*.*.*`.
 
 ## Dependabot
 

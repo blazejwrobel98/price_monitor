@@ -4,10 +4,16 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-05-10
+
+### Naprawiono
+
+- Historia cen: przy udanym odczycie z tą samą ceną co **ostatni wiersz** `ok` aktualizowany jest `checked_at` zamiast dopisywać duplikat; wcześniejszy warunek względem „ostatniego OK” powodował nowy wiersz po każdym przeplatającym się błędzie (np. wiele punktów z identyczną ceną na wykresie).
+
 ### Zmieniono
 
+- Backend: powtarzający się błąd z tym samym komunikatem (`detail`) — jak przy stabilnej cenie, odświeżany jest `checked_at` ostatniego rekordu `error` zamiast kolejnego wiersza.
 - Frontend: lista produktów z cache w pamięci (TTL 45 s) przy nawigacji; unieważnianie po dodaniu / edycji / usunięciu / „Sprawdź teraz”.
-- Backend: przy udanym odczycie z **tą samą ceną** co ostatni rekord `ok` — aktualizowany jest `checked_at` istniejącego wiersza zamiast dopisywania kolejnego (mniej szumu w historii i w bazie); nadal dopisywane są błędy i każda zmiana ceny.
 - Frontend (Dependabot): `lucide-react` ^1.14, `recharts` ^3.8, `typescript` ~6.0, `tailwindcss` ^4.3 z `@tailwindcss/vite`, `vite` ^6.4, `@vitejs/plugin-react` ^5.2 (wariant plugin-react **6.x** wymaga Vite 8); usunięto `price-monitor: file:..` z `frontend/package.json`.
 
 ## [0.0.2] - 2026-05-11

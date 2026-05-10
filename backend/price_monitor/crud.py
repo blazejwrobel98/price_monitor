@@ -126,6 +126,17 @@ def kv_delete(db: Session, key: str) -> None:
         db.commit()
 
 
+def latest_price_record(db: Session, product_id: int) -> PriceRecord | None:
+    """Ostatni wiersz historii dla produktu (najwyższe id) — stan widoczny na liście."""
+    q = (
+        select(PriceRecord)
+        .where(PriceRecord.product_id == product_id)
+        .order_by(PriceRecord.id.desc())
+        .limit(1)
+    )
+    return db.scalars(q).first()
+
+
 def latest_ok_price_record(db: Session, product_id: int) -> PriceRecord | None:
     """Ostatni zapisany rekord z udaną ceną (przed dodaniem nowego odczytu)."""
     q = (

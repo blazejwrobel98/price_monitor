@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     database_url: str | None = None
     scheduler_enabled: bool = True
     default_user_agent: str = (
-        "Mozilla/5.0 (compatible; PriceMonitor/0.0.2; +https://github.com/price-monitor)"
+        "Mozilla/5.0 (compatible; PriceMonitor/0.0.3; +https://github.com/price-monitor)"
     )
     request_timeout_seconds: float = 25.0
 

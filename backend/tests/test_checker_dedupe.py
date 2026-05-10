@@ -81,3 +81,77 @@ def test_error_then_ok_still_inserts(client):
         assert len(crud.list_price_history(db, pid, limit=10)) == 2
     finally:
         db.close()
+
+
+def test_ok_after_error_same_price_inserts_new_row_not_touch_old_ok(client):
+    """Po błędzie nad ostatnim OK nie wolno tylko „dotknąć” starego OK — lista używa max(id)."""
+    settings = client.app.state.settings
+    db = client.app.state.session_factory()
+    try:
+        p = crud.create_product(
+            db,
+            name="R",
+            url="https://example.com",
+            price_selector=".x",
+            currency="PLN",
+            check_interval_minutes=60,
+            is_active=True,
+        )
+        pid = p.id
+        crud.add_price_record(
+            db,
+            product_id=pid,
+            price=Decimal("10"),
+            status="ok",
+            detail=None,
+        )
+        crud.add_price_record(
+            db,
+            product_id=pid,
+            price=None,
+            status="error",
+            detail="down",
+        )
+        with patch(
+            "price_monitor.services.checker.fetch_and_extract_price",
+            return_value=("ok", Decimal("10"), None),
+        ):
+            run_check_for_product(db, crud.get_product(db, pid), settings)
+        rows = crud.list_price_history(db, pid, limit=10)
+        assert len(rows) == 3
+        assert rows[0].status == "ok"
+        assert rows[0].price == Decimal("10")
+    finally:
+        db.close()
+
+
+def test_repeated_identical_error_updates_timestamp(client):
+    settings = client.app.state.settings
+    db = client.app.state.session_factory()
+    try:
+        p = crud.create_product(
+            db,
+            name="Err",
+            url="https://example.com",
+            price_selector=".x",
+            currency="PLN",
+            check_interval_minutes=60,
+            is_active=True,
+        )
+        pid = p.id
+        mock = ("error", None, "timeout")
+        with patch(
+            "price_monitor.services.checker.fetch_and_extract_price",
+            return_value=mock,
+        ):
+            run_check_for_product(db, crud.get_product(db, pid), settings)
+            run_check_for_product(db, crud.get_product(db, pid), settings)
+        assert len(crud.list_price_history(db, pid, limit=10)) == 1
+        with patch(
+            "price_monitor.services.checker.fetch_and_extract_price",
+            return_value=("error", None, "other"),
+        ):
+            run_check_for_product(db, crud.get_product(db, pid), settings)
+        assert len(crud.list_price_history(db, pid, limit=10)) == 2
+    finally:
+        db.close()
