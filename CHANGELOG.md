@@ -24,6 +24,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 - Scalanie Dependabot: obsługa secretu **`DEPENDABOT_MERGE_TOKEN`** (PAT z zapisem do workflowów) — używany zamiast `GITHUB_TOKEN`, gdy GraphQL nadal odrzuca merge PR zmieniających `.github/workflows/`.
 - Wyświetlanie adresu URL: zawsze skrócona etykieta bez `https://` (host + ścieżka), poprawne `min-w-0` / `truncate` w układzie flex; testy dla `formatUrlLabel`.
 - Dodano zależność **python-multipart** (wymagana przez FastAPI przy uploadzie kopii bazy w CI i produkcji).
+- Harmonogram (APScheduler): przyrostowa synchronizacja jobów zamiast `remove_all_jobs()` — zapis jednego produktu nie odracał już sprawdzeń pozostałych o pełny interwał; pierwsze uruchomienie nowego joba w krótkim oknie (rozłożone w czasie); większy `misfire_grace_time` przy długich interwałach.
 
 ## [0.0.1] - 2026-05-10
 
