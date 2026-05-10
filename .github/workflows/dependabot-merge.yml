@@ -1,57 +1,38 @@
-# PR-y Dependabot uruchamiają workflow Integracja z GITHUB_TOKEN tylko do odczytu — merge w tym samym
-# workflow nie może zmieniać .github/workflows nawet przy workflows: write.
-# Ten workflow startuje po zakończeniu Integracji (workflow_run) i dostaje zwykły token z zapisem.
+# Merge po zielonym CI: `gh pr merge --auto` czeka na wymagane checki (Integracja).
+# `pull_request_target` — nie odpala się przy pushu na main (w przeciwieństwie do
+# samego `workflow_run`, który potrafi wysyłać powiadomienia przy każdym CI).
+# Nie checkoutujemy HEAD PR (tylko API gh) — bezpieczny wzorzec dla PR z zewnątrz.
 name: Scalanie Dependabot
 
 on:
-  workflow_run:
-    workflows: [Integracja]
-    types: [completed]
-    # Tylko PR-y Dependabot (gałąź head). Bez tego workflow startował po każdym CI → maile przy każdym commicie.
-    branches:
-      - "dependabot/**"
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  workflows: write
 
 jobs:
   merge:
     runs-on: ubuntu-latest
     if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
-    permissions:
-      contents: write
-      pull-requests: write
-      workflows: write
+      github.actor == 'dependabot[bot]' &&
+      startsWith(github.head_ref, 'dependabot/')
     steps:
-      - name: Squash merge PR Dependabot
+      - name: Squash merge po zielonych checkach
         env:
           TOKEN_PAT: ${{ secrets.DEPENDABOT_MERGE_TOKEN }}
           TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           if [ -n "${TOKEN_PAT}" ]; then
             export GH_TOKEN="${TOKEN_PAT}"
-            echo "::notice::Scalanie: użyto secretu DEPENDABOT_MERGE_TOKEN (PAT z uprawnieniem do workflowów)."
+            echo "::notice::Scalanie: użyto secretu DEPENDABOT_MERGE_TOKEN."
           else
             export GH_TOKEN="${TOKEN_GITHUB}"
-            echo "::notice::Scalanie: użyto GITHUB_TOKEN. Jeśli merge pada z błędem o braku uprawnienia workflows, ustaw secret DEPENDABOT_MERGE_TOKEN (PAT) — opis w README, sekcja Dependabot."
+            echo "::notice::Scalanie: użyto GITHUB_TOKEN (PR zmieniające workflow mogą wymagać PAT — README)."
           fi
-          REPO="${{ github.repository }}"
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-          OWNER="${REPO%%/*}"
-          PR_JSON=$(gh pr list --repo "$REPO" --head "${OWNER}:${BRANCH}" --state open --json number,author,isDraft --jq '.[0]')
-          if [ "$PR_JSON" = "null" ] || [ -z "$PR_JSON" ]; then
-            echo "Brak otwartego PR dla gałęzi ${BRANCH} — pomijam."
-            exit 0
-          fi
-          AUTHOR=$(echo "$PR_JSON" | jq -r '.author.login')
-          if [ "$AUTHOR" != "dependabot[bot]" ]; then
-            echo "Autor PR to ${AUTHOR}, nie Dependabot — pomijam."
-            exit 0
-          fi
-          if [ "$(echo "$PR_JSON" | jq -r '.isDraft')" = "true" ]; then
-            echo "Szkic PR — pomijam."
-            exit 0
-          fi
-          NUMBER=$(echo "$PR_JSON" | jq -r '.number')
-          gh pr merge "$NUMBER" --squash --repo "$REPO"
+          gh pr merge "${PR_NUMBER}" --squash --auto --repo "${{ github.repository }}"
