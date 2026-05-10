@@ -10,7 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "lucide-react": "^0.468.0",
+    "lucide-react": "^1.14.0",
     "price-monitor": "file:..",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
