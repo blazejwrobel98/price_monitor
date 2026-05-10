@@ -8,7 +8,7 @@ from sqlalchemy import inspect
 from price_monitor.config import Settings
 from price_monitor.db import make_engine
 from price_monitor.migrate import run_database_migrations
-from price_monitor.models import Base
+from price_monitor.models import Base, PriceRecord, Product
 
 
 def test_migrate_creates_schema(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
@@ -27,6 +27,7 @@ def test_migrate_creates_schema(monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
 
     assert "products" in names
     assert "price_records" in names
+    assert "app_kv" in names
     assert "alembic_version" in names
 
 
@@ -38,7 +39,7 @@ def test_legacy_create_all_database_gets_stamped(monkeypatch: pytest.MonkeyPatch
     settings = Settings()
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     engine = make_engine(settings)
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine, tables=[Product.__table__, PriceRecord.__table__])
     engine.dispose()
 
     e = make_engine(settings)

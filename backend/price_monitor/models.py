@@ -31,6 +31,15 @@ class Product(Base):
     )
 
 
+class AppKv(Base):
+    """Proste ustawienia klucz–wartość (np. kanał ntfy)."""
+
+    __tablename__ = "app_kv"
+
+    key: Mapped[str] = mapped_column(String(128), primary_key=True)
+    value: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+
 class PriceRecord(Base):
     __tablename__ = "price_records"
 

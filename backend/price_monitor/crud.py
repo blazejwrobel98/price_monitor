@@ -4,7 +4,9 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from price_monitor.models import PriceRecord, Product
+from price_monitor.models import AppKv, PriceRecord, Product
+
+KV_NTFY_CHANNEL = "ntfy_channel"
 
 
 def list_products(db: Session, active_only: bool = False) -> list[Product]:
@@ -91,3 +93,39 @@ def list_price_history(
         .limit(limit)
     )
     return list(db.scalars(q))
+
+
+def kv_get(db: Session, key: str) -> str | None:
+    row = db.get(AppKv, key)
+    return row.value if row else None
+
+
+def kv_set(db: Session, key: str, value: str) -> None:
+    row = db.get(AppKv, key)
+    if row:
+        row.value = value
+    else:
+        db.add(AppKv(key=key, value=value))
+    db.commit()
+
+
+def kv_delete(db: Session, key: str) -> None:
+    row = db.get(AppKv, key)
+    if row:
+        db.delete(row)
+        db.commit()
+
+
+def latest_ok_price_record(db: Session, product_id: int) -> PriceRecord | None:
+    """Ostatni zapisany rekord z udaną ceną (przed dodaniem nowego odczytu)."""
+    q = (
+        select(PriceRecord)
+        .where(
+            PriceRecord.product_id == product_id,
+            PriceRecord.status == "ok",
+            PriceRecord.price.is_not(None),
+        )
+        .order_by(PriceRecord.id.desc())
+        .limit(1)
+    )
+    return db.scalars(q).first()

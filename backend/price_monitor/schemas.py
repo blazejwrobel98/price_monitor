@@ -55,3 +55,9 @@ class CheckResult(BaseModel):
     price: Decimal | None = None
     detail: str | None = None
     checked_at: datetime
+
+
+class NotificationsSettings(BaseModel):
+    """Kanał ntfy: sam topic (np. `moj-tajny-kanal`) lub pełny URL (`https://ntfy.sh/topic`)."""
+
+    ntfy_channel: str = Field(default="", max_length=2048)

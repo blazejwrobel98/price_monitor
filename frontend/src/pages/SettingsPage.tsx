@@ -1,14 +1,70 @@
-import { Download, HardDriveUpload, ShieldAlert } from "lucide-react";
-import { useRef, useState } from "react";
-import { downloadBackupFile, restoreBackupFile } from "../api";
+import { Bell, Download, HardDriveUpload, ShieldAlert } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  downloadBackupFile,
+  fetchNotificationsSettings,
+  restoreBackupFile,
+  saveNotificationsSettings,
+  testNotifications,
+} from "../api";
 
 export function SettingsPage() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [ntfyChannel, setNtfyChannel] = useState("");
+  const [ntfyLoaded, setNtfyLoaded] = useState(false);
+  const [ntfyBusy, setNtfyBusy] = useState(false);
   const [busy, setBusy] = useState<"dl" | "up" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [selected, setSelected] = useState<File | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const s = await fetchNotificationsSettings();
+        if (!cancelled) {
+          setNtfyChannel(s.ntfy_channel);
+          setNtfyLoaded(true);
+        }
+      } catch {
+        if (!cancelled) setNtfyLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const onSaveNtfy = async () => {
+    setNtfyBusy(true);
+    setError(null);
+    setOk(null);
+    try {
+      const s = await saveNotificationsSettings({ ntfy_channel: ntfyChannel });
+      setNtfyChannel(s.ntfy_channel);
+      setOk("Zapisano kanał ntfy.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Nie udało się zapisać.");
+    } finally {
+      setNtfyBusy(false);
+    }
+  };
+
+  const onTestNtfy = async () => {
+    setNtfyBusy(true);
+    setError(null);
+    setOk(null);
+    try {
+      await testNotifications();
+      setOk("Wysłano wiadomość testową na ntfy.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Test ntfy nie powiódł się.");
+    } finally {
+      setNtfyBusy(false);
+    }
+  };
 
   const onDownload = async () => {
     setBusy("dl");
@@ -75,6 +131,63 @@ export function SettingsPage() {
           {ok}
         </div>
       ) : null}
+
+      <section className="mb-8 rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 p-6 shadow-xl shadow-black/20">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-zinc-800/80 text-sky-400">
+            <Bell className="h-6 w-6" aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-semibold text-white">Powiadomienia (ntfy)</h2>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+              Podaj <strong className="text-zinc-200">topic</strong> (np. na{" "}
+              <a
+                className="text-emerald-400 hover:text-emerald-300"
+                href="https://ntfy.sh"
+                target="_blank"
+                rel="noreferrer"
+              >
+                ntfy.sh
+              </a>
+              ) albo <strong className="text-zinc-200">pełny URL</strong> do topicu na własnym serwerze. Po zapisie
+              dostaniesz powiadomienie przy <strong className="text-zinc-200">dodaniu produktu</strong> oraz{" "}
+              <strong className="text-zinc-200">jednorazowo</strong>, gdy cena spadnie względem ostatniego udanego
+              odczytu.
+            </p>
+            <label className="mt-4 block text-xs font-medium uppercase tracking-wide text-zinc-500" htmlFor="ntfy-ch">
+              Kanał / URL
+            </label>
+            <input
+              id="ntfy-ch"
+              type="text"
+              value={ntfyChannel}
+              onChange={(e) => setNtfyChannel(e.target.value)}
+              disabled={!ntfyLoaded || ntfyBusy}
+              placeholder="np. moj-tajny-topic lub https://ntfy.example.com/topic"
+              className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-white outline-none focus:ring-2 focus:ring-sky-500/50 disabled:opacity-50"
+              autoComplete="off"
+            />
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                type="button"
+                disabled={!ntfyLoaded || ntfyBusy}
+                onClick={() => void onSaveNtfy()}
+                className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-600/20 transition hover:bg-sky-500 disabled:opacity-50"
+              >
+                {ntfyBusy ? "…" : "Zapisz"}
+              </button>
+              <button
+                type="button"
+                disabled={!ntfyLoaded || ntfyBusy}
+                onClick={() => void onTestNtfy()}
+                className="rounded-xl border border-zinc-600 bg-zinc-800/80 px-4 py-2.5 text-sm font-medium text-zinc-100 hover:bg-zinc-700 disabled:opacity-50"
+              >
+                Wyślij test
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 p-6 shadow-xl shadow-black/20">
         <div className="flex items-start gap-4">

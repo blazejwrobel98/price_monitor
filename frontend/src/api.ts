@@ -152,3 +152,31 @@ export async function restoreBackupFile(file: File): Promise<void> {
     throw new Error(await errorBody(res));
   }
 }
+
+export type NotificationsSettings = {
+  ntfy_channel: string;
+};
+
+export async function fetchNotificationsSettings(): Promise<NotificationsSettings> {
+  const res = await fetch(`${base}/api/settings/notifications`);
+  return parseJson(res);
+}
+
+export async function saveNotificationsSettings(
+  body: NotificationsSettings,
+): Promise<NotificationsSettings> {
+  const res = await fetch(`${base}/api/settings/notifications`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return parseJson(res);
+}
+
+export async function testNotifications(): Promise<{ ok: boolean }> {
+  const res = await fetch(`${base}/api/settings/notifications/test`, { method: "POST" });
+  if (!res.ok) {
+    throw new Error(await errorBody(res));
+  }
+  return parseJson(res);
+}

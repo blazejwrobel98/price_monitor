@@ -12,6 +12,7 @@ from price_monitor.schemas import (
     ProductUpdate,
 )
 from price_monitor.services.checker import run_check_for_product
+from price_monitor.services.ntfy import notify_product_added
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -74,6 +75,7 @@ def create_product(
         check_interval_minutes=body.check_interval_minutes,
         is_active=body.is_active,
     )
+    notify_product_added(db, p)
     return _product_list_item(db, p)
 
 

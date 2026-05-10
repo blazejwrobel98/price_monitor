@@ -10,6 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from price_monitor.api.backup import router as backup_router
 from price_monitor.api.health import router as health_router
+from price_monitor.api.notifications import router as notifications_router
 from price_monitor.api.products import router as products_router
 from price_monitor.config import Settings
 from price_monitor.db import make_engine, make_session_factory
@@ -67,6 +68,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health_router, prefix="/api")
     app.include_router(backup_router, prefix="/api")
+    app.include_router(notifications_router, prefix="/api")
     app.include_router(products_router, prefix="/api")
 
     if STATIC_DIR.is_dir():

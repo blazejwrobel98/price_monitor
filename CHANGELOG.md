@@ -7,6 +7,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 ### Dodano
 
 - Automatyczne migracje bazy (**Alembic**): przy starcie aplikacji wykonywane jest `upgrade` do najnowszego schematu; istniejące bazy utworzone wcześniej przez `create_all` są jednorazowo „stemplowane”, żeby nie duplikować tabel.
+- Powiadomienia **ntfy**: kanał w Ustawieniach, test, powiadomienie po dodaniu produktu oraz **jednorazowo** przy spadku ceny względem ostatniego udanego odczytu; tabela `app_kv` (migracja Alembic).
 - Panel boczny (zwijany do samych ikon, stan w `localStorage`) oraz strona **Ustawienia**: pobieranie kopii SQLite, wgrywanie i przywracanie bazy.
 - Edycja monitorowanego produktu ze strony szczegółów (modal, zapis przez `PATCH /api/products/{id}`).
 - Wersja aplikacji w panelu bocznym (z `package.json` / build Vite), nad przyciskiem zwijania.
