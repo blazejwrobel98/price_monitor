@@ -23,6 +23,24 @@ export type PriceRecord = {
 
 const base = "";
 
+/** Lista produktów z /api/products — krótki cache (nawigacja między zakładkami). */
+let productsListCache: { data: Product[]; at: number } | null = null;
+const PRODUCTS_LIST_TTL_MS = 45_000;
+
+export function getProductsListIfCached(): Product[] | null {
+  return peekProductsListCache();
+}
+
+export function invalidateProductsListCache(): void {
+  productsListCache = null;
+}
+
+function peekProductsListCache(): Product[] | null {
+  if (!productsListCache) return null;
+  if (Date.now() - productsListCache.at > PRODUCTS_LIST_TTL_MS) return null;
+  return productsListCache.data;
+}
+
 async function parseJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const text = await res.text();
@@ -37,8 +55,12 @@ export async function fetchProduct(id: number): Promise<Product> {
 }
 
 export async function fetchProducts(): Promise<Product[]> {
+  const hit = peekProductsListCache();
+  if (hit) return hit;
   const res = await fetch(`${base}/api/products`);
-  return parseJson(res);
+  const data = await parseJson<Product[]>(res);
+  productsListCache = { data, at: Date.now() };
+  return data;
 }
 
 export async function createProduct(body: {
@@ -54,7 +76,9 @@ export async function createProduct(body: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  return parseJson(res);
+  const data = await parseJson<Product>(res);
+  invalidateProductsListCache();
+  return data;
 }
 
 export async function updateProduct(
@@ -73,7 +97,9 @@ export async function updateProduct(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  return parseJson(res);
+  const data = await parseJson<Product>(res);
+  invalidateProductsListCache();
+  return data;
 }
 
 export async function deleteProduct(id: number): Promise<void> {
@@ -82,6 +108,7 @@ export async function deleteProduct(id: number): Promise<void> {
     const text = await res.text();
     throw new Error(text || res.statusText);
   }
+  invalidateProductsListCache();
 }
 
 export async function fetchHistory(id: number): Promise<PriceRecord[]> {
@@ -96,7 +123,14 @@ export async function checkNow(id: number): Promise<{
   checked_at: string;
 }> {
   const res = await fetch(`${base}/api/products/${id}/check`, { method: "POST" });
-  return parseJson(res);
+  const data = await parseJson<{
+    status: string;
+    price: string | number | null;
+    detail: string | null;
+    checked_at: string;
+  }>(res);
+  invalidateProductsListCache();
+  return data;
 }
 
 async function errorBody(res: Response): Promise<string> {

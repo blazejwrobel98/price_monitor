@@ -6,7 +6,9 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 ### Zmieniono
 
-- Frontend: zbiorcza aktualizacja z PR Dependabot — `lucide-react` ^1.14, `recharts` ^3.8, `typescript` ~6.0, `tailwindcss` ^4.3 z `@tailwindcss/vite` (usunięty `postcss.config.js`), `vite` ^6.4, `@vitejs/plugin-react` ^5.2 (wariant **6.x** z PR wymaga Vite 8 — do osobnej migracji). Usunięto błędną zależność `price-monitor: file:..` z `frontend/package.json`.
+- Frontend: lista produktów z cache w pamięci (TTL 45 s) przy nawigacji; unieważnianie po dodaniu / edycji / usunięciu / „Sprawdź teraz”.
+- Backend: przy udanym odczycie z **tą samą ceną** co ostatni rekord `ok` — aktualizowany jest `checked_at` istniejącego wiersza zamiast dopisywania kolejnego (mniej szumu w historii i w bazie); nadal dopisywane są błędy i każda zmiana ceny.
+- Frontend (Dependabot): `lucide-react` ^1.14, `recharts` ^3.8, `typescript` ~6.0, `tailwindcss` ^4.3 z `@tailwindcss/vite`, `vite` ^6.4, `@vitejs/plugin-react` ^5.2 (wariant plugin-react **6.x** wymaga Vite 8); usunięto `price-monitor: file:..` z `frontend/package.json`.
 
 ## [0.0.2] - 2026-05-11
 

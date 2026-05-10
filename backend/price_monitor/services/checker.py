@@ -22,14 +22,26 @@ def run_check_for_product(db: Session, product: Product, settings: Settings):
     else:
         product.last_error = detail
     db.add(product)
-    crud.add_price_record(
-        db,
-        product_id=product.id,
-        price=price,
-        status=status,
-        detail=detail,
-        checked_at=now,
+
+    same_ok_price = (
+        status == "ok"
+        and price is not None
+        and prev_ok is not None
+        and prev_ok.price is not None
+        and price == prev_ok.price
     )
+    if same_ok_price:
+        crud.touch_price_record_checked_at(db, prev_ok.id, now)
+    else:
+        crud.add_price_record(
+            db,
+            product_id=product.id,
+            price=price,
+            status=status,
+            detail=detail,
+            checked_at=now,
+        )
+
     if (
         status == "ok"
         and price is not None

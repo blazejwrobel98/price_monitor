@@ -65,6 +65,16 @@ def add_price_record(
     return rec
 
 
+def touch_price_record_checked_at(db: Session, record_id: int, checked_at: datetime) -> None:
+    """Przesuwa znacznik czasu odczytu (np. ta sama cena co poprzednio — bez nowego wiersza)."""
+    row = db.get(PriceRecord, record_id)
+    if not row:
+        return
+    row.checked_at = checked_at
+    db.add(row)
+    db.commit()
+
+
 def latest_records_for_products(db: Session, product_ids: list[int]) -> dict[int, PriceRecord]:
     if not product_ids:
         return {}

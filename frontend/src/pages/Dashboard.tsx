@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { createProduct, fetchProducts, type Product } from "../api";
+import { createProduct, fetchProducts, getProductsListIfCached, type Product } from "../api";
 import { formatLocalDateTime } from "../formatDateTime";
 import { formatUrlLabel } from "../formatUrl";
 
@@ -32,8 +32,9 @@ export function Dashboard() {
   const [intervalMin, setIntervalMin] = useState(60);
 
   const load = async () => {
-    setLoading(true);
     setError(null);
+    const hadListCache = getProductsListIfCached() !== null;
+    if (!hadListCache) setLoading(true);
     try {
       setItems(await fetchProducts());
     } catch (e) {
@@ -44,6 +45,11 @@ export function Dashboard() {
   };
 
   useEffect(() => {
+    const cached = getProductsListIfCached();
+    if (cached) {
+      setItems(cached);
+      setLoading(false);
+    }
     void load();
   }, []);
 
