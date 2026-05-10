@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createProduct, fetchProducts, type Product } from "../api";
+import { formatUrlLabel } from "../formatUrl";
 
 function formatMoney(v: string | number | null, currency: string) {
   if (v === null || v === undefined) return "—";
@@ -124,12 +125,14 @@ export function Dashboard() {
                 to={`/product/${p.id}`}
                 className="group rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/80 to-zinc-950/80 p-5 shadow-lg shadow-black/40 transition hover:border-emerald-500/40 hover:shadow-emerald-500/10"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
                     <h2 className="text-lg font-semibold text-zinc-50 group-hover:text-white">
                       {p.name}
                     </h2>
-                    <p className="mt-1 line-clamp-2 break-all text-xs text-zinc-500">{p.url}</p>
+                    <p className="mt-1 min-w-0 truncate text-xs text-zinc-500" title={p.url}>
+                      {formatUrlLabel(p.url, 64)}
+                    </p>
                   </div>
                   <span
                     className={

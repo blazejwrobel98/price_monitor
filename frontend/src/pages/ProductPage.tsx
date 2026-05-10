@@ -19,6 +19,7 @@ import {
   type PriceRecord,
   type Product,
 } from "../api";
+import { formatUrlLabel } from "../formatUrl";
 
 function formatMoney(v: string | number | null, currency: string) {
   if (v === null || v === undefined) return "—";
@@ -42,27 +43,6 @@ function formatTime(iso: string | null) {
     dateStyle: "short",
     timeStyle: "short",
   }).format(d);
-}
-
-/** Skrócony podpis linku (host + ścieżka), pełny URL w atrybucie `title`. */
-function formatUrlLabel(url: string, maxChars = 56): string {
-  const raw = url.trim();
-  if (raw.length <= maxChars) return raw;
-  try {
-    const u = new URL(raw);
-    const host = u.hostname.replace(/^www\./i, "");
-    const path = u.pathname === "/" ? "" : u.pathname;
-    const tail = `${path}${u.search}${u.hash}`;
-    const combined = tail ? `${host}${tail}` : host;
-    if (combined.length <= maxChars) return combined;
-    const headRoom = Math.min(host.length, maxChars - 2);
-    const hostPart = host.slice(0, headRoom);
-    const rest = maxChars - hostPart.length - 1;
-    if (rest <= 1) return `${hostPart}…`;
-    return `${hostPart}${tail.slice(0, rest - 1)}…`;
-  } catch {
-    return `${raw.slice(0, maxChars - 1)}…`;
-  }
 }
 
 export function ProductPage({ id }: { id: number }) {
@@ -203,19 +183,19 @@ export function ProductPage({ id }: { id: number }) {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0 flex-1">
           <Link className="text-sm text-zinc-500 hover:text-zinc-300" to="/">
             ← Lista
           </Link>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">{product.name}</h1>
           <a
-            className="mt-1 inline-block max-w-full truncate text-sm text-emerald-400 hover:text-emerald-300"
+            className="mt-1 block max-w-full min-w-0 truncate text-sm text-emerald-400 hover:text-emerald-300"
             href={product.url}
             target="_blank"
             rel="noreferrer"
             title={product.url}
           >
-            {formatUrlLabel(product.url)}
+            {formatUrlLabel(product.url, 52)}
           </a>
           <p className="mt-3 text-sm text-zinc-400">
             Bieżąca cena:{" "}

@@ -20,6 +20,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 ### Naprawiono
 
+- Wyświetlanie adresu URL: zawsze skrócona etykieta bez `https://` (host + ścieżka), poprawne `min-w-0` / `truncate` w układzie flex; testy dla `formatUrlLabel`.
 - Dodano zależność **python-multipart** (wymagana przez FastAPI przy uploadzie kopii bazy w CI i produkcji).
 
 ## [0.0.1] - 2026-05-10
