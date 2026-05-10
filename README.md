@@ -72,6 +72,15 @@ Zobacz [`.env.example`](./.env.example). Tylko gdy musisz zmienić port: `PRICE_
 
 ## Produkcja (jeden obraz)
 
+**Pobranie z GHCR:** pełna nazwa obrazu to `ghcr.io/blazejwrobel98/price_monitor` (małe litery). Sam tag `price-monitor:0.0.3` z głównego `docker-compose.yml` wskazuje na **Docker Hub** — stamtąd pobranie się nie uda. Na serwerze użyj [`docker-compose.ghcr.yml`](./docker-compose.ghcr.yml):
+
+```bash
+docker compose -f docker-compose.ghcr.yml pull
+docker compose -f docker-compose.ghcr.yml up -d
+```
+
+**Budowa lokalna** (frontend wbudowany w obraz):
+
 Obraz buduje frontend i osadza go w backendzie (FastAPI serwuje statyczne pliki SPA).
 
 ```bash

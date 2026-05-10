@@ -1,0 +1,19 @@
+# Uruchomienie na serwerze z obrazem z GitHub Container Registry (bez budowania lokalnie).
+# docker compose -f docker-compose.ghcr.yml pull && docker compose -f docker-compose.ghcr.yml up -d
+#
+# Jeśli forkujesz repo: podmień właściciela/nazwę na swój pakiet GHCR albo zbuduj obraz sam (`docker compose up --build` z głównego pliku).
+
+services:
+  price-monitor:
+    image: ghcr.io/blazejwrobel98/price_monitor:0.0.3
+    ports:
+      - "8080:8080"
+    environment:
+      DATA_DIR: /data
+      SCHEDULER_ENABLED: "true"
+    volumes:
+      - price_monitor_data:/data
+    restart: unless-stopped
+
+volumes:
+  price_monitor_data:
