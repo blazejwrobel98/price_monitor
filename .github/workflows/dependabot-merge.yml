@@ -1,13 +1,15 @@
-# Merge po zielonym CI: `gh pr merge --auto` czeka na wymagane checki (Integracja).
-# `pull_request_target` — nie odpala się przy pushu na main (w przeciwieństwie do
-# samego `workflow_run`, który potrafi wysyłać powiadomienia przy każdym CI).
-# Nie checkoutujemy HEAD PR (tylko API gh) — bezpieczny wzorzec dla PR z zewnątrz.
+# Uruchamiany tylko przy pushu na gałąź dependabot/** (Dependabot aktualizuje PR).
+# NIE używamy pull_request_target z branches: [main] — wtedy workflow startował przy
+# każdym PR do main, wszystkie joby były pomijane (if) → „No jobs were run” i maile.
+#
+# Po pushu czekamy, aż PR będzie mergeStateStatus=CLEAN (m.in. zielona Integracja),
+# potem squash merge. Ustaw w branch protection wymagany status „Integracja”.
 name: Scalanie Dependabot
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
-    branches: [main]
+  push:
+    branches:
+      - "dependabot/**"
 
 permissions:
   contents: write
@@ -17,22 +19,62 @@ permissions:
 jobs:
   merge:
     runs-on: ubuntu-latest
-    if: >
-      github.actor == 'dependabot[bot]' &&
-      startsWith(github.head_ref, 'dependabot/')
     steps:
-      - name: Squash merge po zielonych checkach
+      - name: Czekaj na zieloną Integrację i scal PR
         env:
           TOKEN_PAT: ${{ secrets.DEPENDABOT_MERGE_TOKEN }}
           TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+          ACTOR="${{ github.actor }}"
+          if [ "$ACTOR" != "dependabot[bot]" ]; then
+            echo "Pomijam: push nie od dependabot[bot] (actor=$ACTOR) — kończę bez merge."
+            exit 0
+          fi
           if [ -n "${TOKEN_PAT}" ]; then
             export GH_TOKEN="${TOKEN_PAT}"
-            echo "::notice::Scalanie: użyto secretu DEPENDABOT_MERGE_TOKEN."
+            echo "::notice::Użyto DEPENDABOT_MERGE_TOKEN."
           else
             export GH_TOKEN="${TOKEN_GITHUB}"
-            echo "::notice::Scalanie: użyto GITHUB_TOKEN (PR zmieniające workflow mogą wymagać PAT — README)."
+            echo "::notice::Użyto GITHUB_TOKEN (PR zmieniające workflow mogą wymagać PAT — README)."
           fi
-          gh pr merge "${PR_NUMBER}" --squash --auto --repo "${{ github.repository }}"
+          REPO="${{ github.repository }}"
+          OWNER="${REPO%%/*}"
+          BRANCH="${{ github.ref_name }}"
+
+          for attempt in $(seq 1 50); do
+            PR_JSON=$(gh pr list --repo "$REPO" --head "${OWNER}:${BRANCH}" --state open \
+              --json number,mergeStateStatus,author --jq '.[0]')
+            if [ "$PR_JSON" = "null" ] || [ -z "$PR_JSON" ]; then
+              echo "Brak otwartego PR dla head ${OWNER}:${BRANCH} (próba $attempt/50)…"
+              sleep 15
+              continue
+            fi
+            AUTHOR=$(echo "$PR_JSON" | jq -r '.author.login')
+            if [ "$AUTHOR" != "dependabot[bot]" ]; then
+              echo "Autor PR to ${AUTHOR}, nie Dependabot — nie scalam."
+              exit 0
+            fi
+            STATUS=$(echo "$PR_JSON" | jq -r '.mergeStateStatus // empty')
+            echo "mergeStateStatus=${STATUS} (próba $attempt/50)"
+            case "$STATUS" in
+              CLEAN)
+                NUMBER=$(echo "$PR_JSON" | jq -r '.number')
+                gh pr merge "$NUMBER" --squash --repo "$REPO"
+                exit 0
+                ;;
+              DIRTY)
+                echo "PR w stanie DIRTY (konflikt?) — nie scalam."
+                exit 0
+                ;;
+              BLOCKED)
+                echo "PR BLOCKED (np. recenzje) — nie scalam."
+                exit 0
+                ;;
+              *)
+                sleep 20
+                ;;
+            esac
+          done
+          echo "::warning::Timeout (~15–20 min): nie uzyskano CLEAN — scal ręcznie lub sprawdź Integrację."
+          exit 0

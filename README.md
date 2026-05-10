@@ -76,9 +76,9 @@ docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.1
 
 ## Dependabot
 
-Workflow [**Scalanie Dependabot**](./.github/workflows/dependabot-merge.yml) uruchamia się na **`pull_request_target`** (tylko PR **do** `main`, od `dependabot[bot]`, gałąź `dependabot/…`). **Nie startuje przy zwykłym pushu na `main`** — nie powinieneś wtedy dostawać maili od tego workflowu (w przeciwieństwie do łańcucha `workflow_run`, który potrafi spamować powiadomieniami).
+Workflow [**Scalanie Dependabot**](./.github/workflows/dependabot-merge.yml) uruchamia się tylko przy **`push` na gałęzie `dependabot/**`** (Dependabot aktualizuje PR). **Nie uruchamia się** przy zwykłym pushu na `main` ani przy otwarciu zwykłego PR do `main` — dlatego nie powinien już generować maili „No jobs were run” przy Twoich commitach (wcześniejszy `pull_request_target` + `branches: [main]` odpalał się przy każdym PR do `main`, a warunek `if` na jobie odrzucał wszystko poza Dependabotem).
 
-Używa `gh pr merge --squash --auto`: merge następuje po spełnieniu **wymaganych** checków (ustaw w **Branch protection** dla `main` wymaganą kontrolę **Integracja** / wymagane statusy z [`ci.yml`](./.github/workflows/ci.yml)). Bez tego merge może nastąpić zanim testy się skończą.
+Skrypt w pętli czeka na **`mergeStateStatus: CLEAN`** (m.in. zielona **Integracja**). W **Branch protection** dla `main` ustaw wymagany status check z [`ci.yml`](./.github/workflows/ci.yml) (np. joby backend / frontend albo nazwa workflowu **Integracja** — tak, jak GitHub pokazuje w ustawieniach ochrony gałęzi).
 
 **Ustawienia GitHub (wymagane do automatycznego merge):**
 

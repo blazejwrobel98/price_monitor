@@ -8,7 +8,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 - Automatyczne migracje bazy (**Alembic**): przy starcie aplikacji wykonywane jest `upgrade` do najnowszego schematu; istniejące bazy utworzone wcześniej przez `create_all` są jednorazowo „stemplowane”, żeby nie duplikować tabel.
 - Panel boczny (zwijany do samych ikon, stan w `localStorage`) oraz strona **Ustawienia**: pobieranie kopii SQLite, wgrywanie i przywracanie bazy.
-- Workflow **Scalanie Dependabot** (`pull_request_target`, `gh pr merge --squash --auto`): squash merge PR Dependabot do `main` po zielonych wymaganych checkach.
+- Workflow **Scalanie Dependabot** (`push` na `dependabot/**`, oczekiwanie na `mergeStateStatus: CLEAN`): squash merge PR Dependabot do `main` po zielonej **Integracji** (bez `pull_request_target` na całe PR do `main` — eliminuje maile „No jobs were run”).
 - Edycja monitorowanego produktu ze strony szczegółów (modal, zapis przez `PATCH /api/products/{id}`).
 - Wersja aplikacji w panelu bocznym (z `package.json` / build Vite), nad przyciskiem zwijania.
 - Skrócony podpis adresu URL na stronie produktu (pełny link w `title` / `href`).
@@ -17,7 +17,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 - Zależności frontendu i lockfile: React 19, React Router 7, Vitest 4, jsdom 29 (zbiorczo z otwartych PR Dependabot).
 - Akcje Docker w workflow release: `setup-buildx-action@v4`, `metadata-action@v6`, `build-push-action@v7`.
-- Scalanie Dependabot: z **`workflow_run`** na **`pull_request_target`** + `--auto` — bez uruchomień przy pushu na `main` (wcześniejszy filtr `branches` przy `workflow_run` bywał niewiarygodny i nadal generował maile).
+- Scalanie Dependabot: z **`pull_request_target`** na **`push: dependabot/**`** — workflow nie startuje przy zwykłych PR/commitach na `main` (naprawa maili „No jobs were run”).
 
 ### Naprawiono
 
