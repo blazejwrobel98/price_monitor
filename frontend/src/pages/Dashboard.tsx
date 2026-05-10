@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createProduct, fetchProducts, type Product } from "../api";
+import { formatLocalDateTime } from "../formatDateTime";
 import { formatUrlLabel } from "../formatUrl";
 
 function formatMoney(v: string | number | null, currency: string) {
@@ -16,14 +17,6 @@ function formatMoney(v: string | number | null, currency: string) {
   } catch {
     return `${n} ${currency}`;
   }
-}
-
-function formatTime(iso: string | null) {
-  if (!iso) return "—";
-  return new Intl.DateTimeFormat("pl-PL", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(iso));
 }
 
 export function Dashboard() {
@@ -153,7 +146,7 @@ export function Dashboard() {
                   </div>
                   <div className="text-right text-xs text-zinc-500">
                     Sprawdzono
-                    <div className="text-zinc-300">{formatTime(p.last_checked_at)}</div>
+                    <div className="text-zinc-300">{formatLocalDateTime(p.last_checked_at)}</div>
                   </div>
                 </div>
                 {p.last_error ? (

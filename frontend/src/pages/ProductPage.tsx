@@ -19,6 +19,7 @@ import {
   type PriceRecord,
   type Product,
 } from "../api";
+import { formatLocalDateTime, parseBackendInstant } from "../formatDateTime";
 import { formatUrlLabel } from "../formatUrl";
 
 function formatMoney(v: string | number | null, currency: string) {
@@ -34,15 +35,6 @@ function formatMoney(v: string | number | null, currency: string) {
   } catch {
     return `${n} ${currency}`;
   }
-}
-
-function formatTime(iso: string | null) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return new Intl.DateTimeFormat("pl-PL", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(d);
 }
 
 export function ProductPage({ id }: { id: number }) {
@@ -118,8 +110,8 @@ export function ProductPage({ id }: { id: number }) {
     const ok = history.filter((r) => r.status === "ok" && r.price !== null);
     const asc = [...ok].reverse();
     return asc.map((r) => ({
-      t: new Date(r.checked_at).getTime(),
-      label: formatTime(r.checked_at),
+      t: parseBackendInstant(r.checked_at).getTime(),
+      label: formatLocalDateTime(r.checked_at),
       price: typeof r.price === "string" ? Number(r.price) : Number(r.price),
     }));
   }, [history]);
@@ -204,7 +196,7 @@ export function ProductPage({ id }: { id: number }) {
             </span>
             <span className="text-zinc-500"> · </span>
             Ostatnie sprawdzenie:{" "}
-            <span className="text-zinc-200">{formatTime(product.last_checked_at)}</span>
+            <span className="text-zinc-200">{formatLocalDateTime(product.last_checked_at)}</span>
           </p>
           {product.last_error ? (
             <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">

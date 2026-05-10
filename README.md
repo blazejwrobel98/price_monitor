@@ -12,7 +12,7 @@ Self‑hosted monitor cen produktów z **historią sprawdzeń** i nowoczesnym pa
 
 - Dodawanie produktów: nazwa, URL strony, **selektor CSS** elementu zawierającego cenę.
 - Automatyczne sprawdzanie w tle (interwał per produkt, domyślnie co 60 minut, minimum 5). Działa tylko przy **ciągle uruchomionym** serwerze (np. kontener Docker); uśpienie komputera lub zatrzymanie procesu = brak ticków harmonogramu. Zapis produktu w panelu nie resetuje już harmonogramu pozostałych pozycji.
-- Zapis każdej próby: status (`ok` / `error`), odczytana cena (jeśli udało się sparsować), znacznik czasu.
+- Zapis każdej próby: status (`ok` / `error`), odczytana cena (jeśli udało się sparsować), znacznik czasu (w bazie **UTC**; w panelu pokazywany w **strefie Twojej przeglądarki**).
 - Dashboard: karty z ostatnią ceną, szczegóły produktu z wykresem historii, ręczne „Sprawdź teraz”.
 
 ## Szybki start (Docker)

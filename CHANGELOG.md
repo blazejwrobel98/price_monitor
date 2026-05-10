@@ -16,6 +16,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 - Zależności frontendu i lockfile: React 19, React Router 7, Vitest 4, jsdom 29 (zbiorczo z otwartych PR Dependabot).
 - Akcje Docker w workflow release: `setup-buildx-action@v4`, `metadata-action@v6`, `build-push-action@v7`.
+- Panel: czas ostatniego sprawdzenia i oś wykresu — parsowanie ISO z API jako UTC (gdy brak strefy w stringu), wyświetlanie w **lokalnej strefie przeglądarki** (`formatDateTime.ts`).
 
 ### Usunięto
 
