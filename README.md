@@ -72,12 +72,14 @@ Zobacz [`.env.example`](./.env.example). Tylko gdy musisz zmienić port: `PRICE_
 
 ## Produkcja (jeden obraz)
 
-**Pobranie z GHCR:** pełna nazwa obrazu to `ghcr.io/blazejwrobel98/price_monitor` (małe litery). Sam tag `price-monitor:0.0.3` z głównego `docker-compose.yml` wskazuje na **Docker Hub** — stamtąd pobranie się nie uda. Na serwerze użyj [`docker-compose.ghcr.yml`](./docker-compose.ghcr.yml):
+**Pobranie z GHCR:** obraz jest w **GitHub Container Registry** (`ghcr.io/…`), a nie w **Docker Hub** (`docker.io/…`). To inny host niż Hub, choć mechanizm `docker pull` jest podobny (warstwy, manifest). Sam wpis `image: price-monitor:0.0.3` w głównym `docker-compose.yml` **bez domeny rejestru** trafia domyślnie na **Docker Hub** — stamtąd tego obrazu nie ma. Pełna nazwa: `ghcr.io/blazejwrobel98/price_monitor:0.0.3`. Na serwerze możesz użyć [`docker-compose.ghcr.yml`](./docker-compose.ghcr.yml):
 
 ```bash
 docker compose -f docker-compose.ghcr.yml pull
 docker compose -f docker-compose.ghcr.yml up -d
 ```
+
+**Brak połączenia z `ghcr.io` (np. timeout na 443 z NUC-a):** jeśli z maszyny docelowej `curl -I https://ghcr.io/v2/` albo HEAD pod manifest (`https://ghcr.io/v2/<właściciel>/<repo>/manifests/<tag>`) nie zestawia TCP w rozsądnym czasie, **`docker pull` z GHCR nie przejdzie** — to kwestia sieci / firewalla, a nie samej nazwy obrazu. Wtedy m.in.: **zbuduj obraz na miejscu** (`git clone` repozytorium na NUC-u i `docker compose up --build` z głównego pliku — potrzebny będzie dostęp do bazowych obrazów `Dockerfile`, zwykle `docker.io`), albo na PC z działającym GHCR: `docker pull …`, `docker save … > price-monitor.tar`, skopiuj plik na serwer, `docker load < price-monitor.tar`, uruchom kontener z załadowanego tagu.
 
 **Budowa lokalna** (frontend wbudowany w obraz):
 
