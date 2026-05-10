@@ -14,6 +14,12 @@ log = logging.getLogger(__name__)
 DEFAULT_NTFY = "https://ntfy.sh"
 
 
+def _latin1_header_value(s: str) -> str:
+    """HTTP/1 nagłówki muszą dać się zakodować jako latin-1; em dash itd. zamieniamy."""
+    t = s.replace("\u2013", "-").replace("\u2014", "-").replace("\u2015", "-")
+    return t.encode("latin-1", errors="replace").decode("latin-1")
+
+
 def resolve_ntfy_publish_url(channel: str) -> str:
     raw = channel.strip()
     if not raw:
@@ -39,9 +45,9 @@ def send_ntfy(db: Session, title: str, body: str, tags: str | None = None) -> No
     if not url:
         log.debug("ntfy_skip_no_channel")
         return
-    headers = {"Title": title}
+    headers = {"Title": _latin1_header_value(title)}
     if tags:
-        headers["Tags"] = tags
+        headers["Tags"] = _latin1_header_value(tags)
     try:
         with httpx.Client(timeout=20.0) as client:
             r = client.post(url, content=body.encode("utf-8"), headers=headers)
@@ -51,7 +57,7 @@ def send_ntfy(db: Session, title: str, body: str, tags: str | None = None) -> No
 
 
 def notify_product_added(db: Session, product: Product) -> None:
-    title = "Price Monitor — monitoring"
+    title = "Price Monitor - monitoring"
     body = f'Dodano produkt: "{product.name}"\n{product.url}'
     send_ntfy(db, title, body, "heavy_plus_sign")
 

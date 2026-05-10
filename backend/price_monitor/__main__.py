@@ -1,8 +1,11 @@
 import uvicorn
 
+from price_monitor.config import Settings
+
 
 def main() -> None:
-    uvicorn.run("price_monitor.main:app", host="0.0.0.0", port=8000, reload=False)
+    port = Settings().price_monitor_port
+    uvicorn.run("price_monitor.main:app", host="0.0.0.0", port=port, reload=False)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-05-11
+
 ### Dodano
 
 - Automatyczne migracje bazy (**Alembic**): przy starcie aplikacji wykonywane jest `upgrade` do najnowszego schematu; istniejące bazy utworzone wcześniej przez `create_all` są jednorazowo „stemplowane”, żeby nie duplikować tabel.
@@ -12,12 +14,16 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 - Edycja monitorowanego produktu ze strony szczegółów (modal, zapis przez `PATCH /api/products/{id}`).
 - Wersja aplikacji w panelu bocznym (z `package.json` / build Vite), nad przyciskiem zwijania.
 - Skrócony podpis adresu URL na stronie produktu (pełny link w `title` / `href`).
+- Skrypt **`npm run dev`** w katalogu głównym repozytorium (`concurrently`: backend z `backend/` + Vite z `frontend/`).
+- Pole **`app`** w odpowiedzi `GET /api/health` (identyfikacja instancji Price Monitor).
+- Domyślny port dev backendu **8017** (`PRICE_MONITOR_PORT` w `Settings`); proxy Vite na ten sam host (`loadEnv`, `frontend/.env`); `preview.proxy` w Vite; `frontend/.env.example`; Dependabot dla npm w katalogu głównym (`/`).
 
 ### Zmieniono
 
 - Zależności frontendu i lockfile: React 19, React Router 7, Vitest 4, jsdom 29 (zbiorczo z otwartych PR Dependabot).
 - Akcje Docker w workflow release: `setup-buildx-action@v4`, `metadata-action@v6`, `build-push-action@v7`.
 - Panel: czas ostatniego sprawdzenia i oś wykresu — parsowanie ISO z API jako UTC (gdy brak strefy w stringu), wyświetlanie w **lokalnej strefie przeglądarki** (`formatDateTime.ts`).
+- Vite dev: `host: "127.0.0.1"`, `strictPort: true`; log `[price-monitor] Vite proxy: …` przy starcie.
 
 ### Usunięto
 
@@ -28,6 +34,8 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 - Wyświetlanie adresu URL: zawsze skrócona etykieta bez `https://` (host + ścieżka), poprawne `min-w-0` / `truncate` w układzie flex; testy dla `formatUrlLabel`.
 - Dodano zależność **python-multipart** (wymagana przez FastAPI przy uploadzie kopii bazy w CI i produkcji).
 - Harmonogram (APScheduler): przyrostowa synchronizacja jobów zamiast `remove_all_jobs()` — zapis jednego produktu nie odracał już sprawdzeń pozostałych o pełny interwał; pierwsze uruchomienie nowego joba w krótkim oknie (rozłożone w czasie); większy `misfire_grace_time` przy długich interwałach.
+- **ntfy:** nagłówki HTTP `Title` / `Tags` kodowane bezpiecznie (latin-1, zamiana em dash) — naprawiono błąd `ascii codec can't encode character` na Windows przy teście powiadomień.
+- Czytelniejszy komunikat w UI przy 404 na endpointach ustawień ntfy w dev (proxy / port).
 
 ## [0.0.1] - 2026-05-10
 

@@ -7,11 +7,13 @@ from sqlalchemy.engine.url import make_url
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
+    # Domyślnie poza 8000, żeby nie kolidować z typowym uvicorn/FastAPI na 8000.
+    price_monitor_port: int = 8017
     data_dir: Path = Path("./data")
     database_url: str | None = None
     scheduler_enabled: bool = True
     default_user_agent: str = (
-        "Mozilla/5.0 (compatible; PriceMonitor/0.0.1; +https://github.com/price-monitor)"
+        "Mozilla/5.0 (compatible; PriceMonitor/0.0.2; +https://github.com/price-monitor)"
     )
     request_timeout_seconds: float = 25.0
 

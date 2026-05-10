@@ -35,7 +35,7 @@ def test_notifications(db: Session = Depends(get_db)):
     url = get_publish_url_from_db(db)
     if not url:
         raise HTTPException(status_code=400, detail="Ustaw i zapisz kanał ntfy przed testem.")
-    headers = {"Title": "Price Monitor — test", "Tags": "white_check_mark"}
+    headers = {"Title": "Price Monitor - test", "Tags": "white_check_mark"}
     body = "Powiadomienia z Price Monitor działają."
     try:
         with httpx.Client(timeout=20.0) as client:

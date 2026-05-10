@@ -1,7 +1,7 @@
 {
   "name": "price-monitor-ui",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
+    "price-monitor": "file:..",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.0",

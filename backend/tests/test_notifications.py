@@ -1,6 +1,10 @@
 from unittest.mock import MagicMock, patch
 
-from price_monitor.services.ntfy import resolve_ntfy_publish_url
+from price_monitor.services.ntfy import _latin1_header_value, resolve_ntfy_publish_url
+
+
+def test_latin1_header_replaces_em_dash():
+    assert _latin1_header_value("Price Monitor \u2014 test") == "Price Monitor - test"
 
 
 def test_resolve_ntfy_topic():

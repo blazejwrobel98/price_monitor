@@ -157,9 +157,31 @@ export type NotificationsSettings = {
   ntfy_channel: string;
 };
 
+/** Gdy 404: zwykle nie działa backend Price Monitor albo Vite proxy nie trafia w ten sam port. */
+const NOTIFY_SETTINGS_404_HINT =
+  "Brak API ustawień (404). Uruchom z głównego katalogu: `npm run dev` (API + Vite). Otwórz dokładnie http://127.0.0.1:5173 — jeśli port jest zajęty, zatrzymaj stary Vite zamiast używać innego numeru portu. README → Lokalny development.";
+
+function messageFromNotificationsError(status: number, text: string): string {
+  if (status === 404 && text.includes("Not Found")) return NOTIFY_SETTINGS_404_HINT;
+  try {
+    const j = JSON.parse(text) as { detail?: unknown };
+    if (typeof j.detail === "string") return j.detail;
+    if (Array.isArray(j.detail)) {
+      return j.detail.map((x: { msg?: string }) => x.msg ?? "").filter(Boolean).join("; ");
+    }
+  } catch {
+    /* not JSON */
+  }
+  return text || `HTTP ${status}`;
+}
+
 export async function fetchNotificationsSettings(): Promise<NotificationsSettings> {
   const res = await fetch(`${base}/api/settings/notifications`);
-  return parseJson(res);
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(messageFromNotificationsError(res.status, text));
+  }
+  return JSON.parse(text) as NotificationsSettings;
 }
 
 export async function saveNotificationsSettings(
@@ -170,13 +192,18 @@ export async function saveNotificationsSettings(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  return parseJson(res);
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(messageFromNotificationsError(res.status, text));
+  }
+  return JSON.parse(text) as NotificationsSettings;
 }
 
 export async function testNotifications(): Promise<{ ok: boolean }> {
   const res = await fetch(`${base}/api/settings/notifications/test`, { method: "POST" });
+  const text = await res.text();
   if (!res.ok) {
-    throw new Error(await errorBody(res));
+    throw new Error(messageFromNotificationsError(res.status, text));
   }
-  return parseJson(res);
+  return JSON.parse(text) as { ok: boolean };
 }

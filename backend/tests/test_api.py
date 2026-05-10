@@ -1,7 +1,9 @@
 def test_health(client):
     r = client.get("/api/health")
     assert r.status_code == 200
-    assert r.json()["status"] == "ok"
+    data = r.json()
+    assert data["status"] == "ok"
+    assert data["app"] == "price-monitor"
 
 
 def test_products_crud(client):

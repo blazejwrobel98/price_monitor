@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "name": "price-monitor",
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \"cd backend && python -m price_monitor\" \"npm --prefix frontend run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
