@@ -44,6 +44,27 @@ function formatTime(iso: string | null) {
   }).format(d);
 }
 
+/** Skrócony podpis linku (host + ścieżka), pełny URL w atrybucie `title`. */
+function formatUrlLabel(url: string, maxChars = 56): string {
+  const raw = url.trim();
+  if (raw.length <= maxChars) return raw;
+  try {
+    const u = new URL(raw);
+    const host = u.hostname.replace(/^www\./i, "");
+    const path = u.pathname === "/" ? "" : u.pathname;
+    const tail = `${path}${u.search}${u.hash}`;
+    const combined = tail ? `${host}${tail}` : host;
+    if (combined.length <= maxChars) return combined;
+    const headRoom = Math.min(host.length, maxChars - 2);
+    const hostPart = host.slice(0, headRoom);
+    const rest = maxChars - hostPart.length - 1;
+    if (rest <= 1) return `${hostPart}…`;
+    return `${hostPart}${tail.slice(0, rest - 1)}…`;
+  } catch {
+    return `${raw.slice(0, maxChars - 1)}…`;
+  }
+}
+
 export function ProductPage({ id }: { id: number }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [history, setHistory] = useState<PriceRecord[]>([]);
@@ -188,12 +209,13 @@ export function ProductPage({ id }: { id: number }) {
           </Link>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">{product.name}</h1>
           <a
-            className="mt-1 inline-block break-all text-sm text-emerald-400 hover:text-emerald-300"
+            className="mt-1 inline-block max-w-full truncate text-sm text-emerald-400 hover:text-emerald-300"
             href={product.url}
             target="_blank"
             rel="noreferrer"
+            title={product.url}
           >
-            {product.url}
+            {formatUrlLabel(product.url)}
           </a>
           <p className="mt-3 text-sm text-zinc-400">
             Bieżąca cena:{" "}

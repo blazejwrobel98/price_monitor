@@ -11,6 +11,12 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 - CI: po przejściu testów automatyczny **squash merge** pull requestów Dependabot do `main`.
 - Edycja monitorowanego produktu ze strony szczegółów (modal, zapis przez `PATCH /api/products/{id}`).
 - Wersja aplikacji w panelu bocznym (z `package.json` / build Vite), nad przyciskiem zwijania.
+- Skrócony podpis adresu URL na stronie produktu (pełny link w `title` / `href`).
+
+### Zmieniono
+
+- Zależności frontendu i lockfile: React 19, React Router 7, Vitest 4, jsdom 29 (zbiorczo z otwartych PR Dependabot).
+- Akcje Docker w workflow release: `setup-buildx-action@v4`, `metadata-action@v6`, `build-push-action@v7`.
 
 ### Naprawiono
 
