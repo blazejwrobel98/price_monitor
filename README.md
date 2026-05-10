@@ -78,7 +78,7 @@ docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.1
 
 Po zielonym CI job **`dependabot-merge`** w [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) scala (squash) pull requesty od `dependabot[bot]` do `main`, żeby zależności nie stały w kolejce ręcznie.
 
-Jeśli merge się nie uda (np. wymagane recenzje, **branch protection**), dostosuj ustawienia repozytorium albo wyłącz ten job. Dla tokena workflow może być potrzebne zezwolenie na zapis do zawartości i PR-ów — jest ustawione na poziomie joba.
+Jeśli merge się nie uda (np. wymagane recenzje, **branch protection**), dostosuj ustawienia repozytorium albo wyłącz ten job. Job ma uprawnienia `contents`, `pull-requests` oraz **`workflows: write`** — bez tego ostatniego GitHub odrzuca merge PR-ów, które zmieniają pliki w `.github/workflows/` (np. podbicie akcji Docker w `release.yml`).
 
 ## Testy
 

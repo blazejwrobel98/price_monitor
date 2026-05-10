@@ -20,6 +20,7 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 ### Naprawiono
 
+- CI: job `dependabot-merge` ma uprawnienie **`workflows: write`**, żeby merge PR Dependabot modyfikujących workflow (np. `release.yml`) nie kończył się błędem GraphQL.
 - Wyświetlanie adresu URL: zawsze skrócona etykieta bez `https://` (host + ścieżka), poprawne `min-w-0` / `truncate` w układzie flex; testy dla `formatUrlLabel`.
 - Dodano zależność **python-multipart** (wymagana przez FastAPI przy uploadzie kopii bazy w CI i produkcji).
 
