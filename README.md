@@ -74,6 +74,12 @@ docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.1
 - Zmiany opisujemy w [`CHANGELOG.md`](./CHANGELOG.md).
 - Tag Git `v0.0.1` + workflow [`.github/workflows/release.yml`](./.github/workflows/release.yml) buduje i publikuje obraz do **GitHub Container Registry** (`ghcr.io/<właściciel>/<repo>` w małych literach).
 
+## Dependabot
+
+Po zielonym CI job **`dependabot-merge`** w [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) scala (squash) pull requesty od `dependabot[bot]` do `main`, żeby zależności nie stały w kolejce ręcznie.
+
+Jeśli merge się nie uda (np. wymagane recenzje, **branch protection**), dostosuj ustawienia repozytorium albo wyłącz ten job. Dla tokena workflow może być potrzebne zezwolenie na zapis do zawartości i PR-ów — jest ustawione na poziomie joba.
+
 ## Testy
 
 ```bash

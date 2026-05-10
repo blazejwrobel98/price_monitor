@@ -9,6 +9,8 @@ import { NavLink, Outlet } from "react-router-dom";
 
 const STORAGE_KEY = "price-monitor-sidebar-collapsed";
 
+const appVersion = __APP_VERSION__;
+
 function readStoredCollapsed(): boolean {
   try {
     return localStorage.getItem(STORAGE_KEY) === "1";
@@ -81,6 +83,18 @@ export function AppShell() {
         </nav>
 
         <div className="border-t border-zinc-800/80 p-2">
+          <div
+            className={
+              collapsed
+                ? "mb-2 flex justify-center"
+                : "mb-3 flex items-center justify-center rounded-xl border border-zinc-800/80 bg-zinc-900/50 px-2 py-2"
+            }
+            title={`Wersja ${appVersion}`}
+          >
+            <span className="rounded-full bg-zinc-800/90 px-2.5 py-1 font-mono text-[11px] font-medium tracking-wide text-zinc-300">
+              v{appVersion}
+            </span>
+          </div>
           <button
             type="button"
             onClick={toggle}
@@ -103,11 +117,7 @@ export function AppShell() {
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center justify-end border-b border-zinc-800/80 bg-zinc-950/80 px-4 backdrop-blur">
-          <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400">
-            v0.0.1
-          </span>
-        </header>
+        <header className="h-14 shrink-0 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur" />
         <main className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
         </main>

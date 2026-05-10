@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Pencil, X } from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -49,6 +50,49 @@ export function ProductPage({ id }: { id: number }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+  const [editSelector, setEditSelector] = useState("");
+  const [editCurrency, setEditCurrency] = useState("PLN");
+  const [editInterval, setEditInterval] = useState(60);
+  const [editActive, setEditActive] = useState(true);
+
+  const openEdit = () => {
+    if (!product) return;
+    setEditName(product.name);
+    setEditUrl(product.url);
+    setEditSelector(product.price_selector);
+    setEditCurrency(product.currency);
+    setEditInterval(product.check_interval_minutes);
+    setEditActive(product.is_active);
+    setEditOpen(true);
+    setError(null);
+  };
+
+  const onEditSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setEditSaving(true);
+    setError(null);
+    try {
+      const p = await updateProduct(id, {
+        name: editName,
+        url: editUrl,
+        price_selector: editSelector,
+        currency: editCurrency,
+        check_interval_minutes: editInterval,
+        is_active: editActive,
+      });
+      setProduct(p);
+      setEditOpen(false);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nie udało się zapisać zmian");
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -170,6 +214,15 @@ export function ProductPage({ id }: { id: number }) {
           <button
             type="button"
             disabled={busy}
+            onClick={openEdit}
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-600 bg-zinc-800/60 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-800 disabled:opacity-50"
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+            Edytuj
+          </button>
+          <button
+            type="button"
+            disabled={busy}
             onClick={() => void onCheck()}
             className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow hover:bg-emerald-400 disabled:opacity-50"
           >
@@ -266,6 +319,113 @@ export function ProductPage({ id }: { id: number }) {
           </div>
         </dl>
       </details>
+
+      {editOpen ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center">
+          <div
+            className="absolute inset-0"
+            role="presentation"
+            onClick={() => !editSaving && setEditOpen(false)}
+          />
+          <form
+            onSubmit={onEditSubmit}
+            className="relative z-10 w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="text-lg font-semibold text-white">Edycja produktu</h3>
+              <button
+                type="button"
+                disabled={editSaving}
+                onClick={() => setEditOpen(false)}
+                className="rounded-lg p-1 text-zinc-500 hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+                aria-label="Zamknij"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="mt-1 text-sm text-zinc-500">
+              Zmiany URL lub selektora wpływają na kolejne sprawdzenia. Interwał minimum 5 minut.
+            </p>
+            <div className="mt-5 space-y-4">
+              <label className="block text-sm">
+                <span className="text-zinc-400">Nazwa</span>
+                <input
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-zinc-400">URL</span>
+                <input
+                  required
+                  type="url"
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-zinc-400">Selektor CSS ceny</span>
+                <input
+                  required
+                  value={editSelector}
+                  onChange={(e) => setEditSelector(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-zinc-400">Waluta (kod ISO)</span>
+                <input
+                  required
+                  value={editCurrency}
+                  onChange={(e) => setEditCurrency(e.target.value.toUpperCase())}
+                  maxLength={8}
+                  className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-zinc-400">Interwał (minuty)</span>
+                <input
+                  required
+                  type="number"
+                  min={5}
+                  value={editInterval}
+                  onChange={(e) => setEditInterval(Number(e.target.value))}
+                  className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 text-sm text-zinc-300">
+                <input
+                  type="checkbox"
+                  checked={editActive}
+                  onChange={(e) => setEditActive(e.target.checked)}
+                  className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/40"
+                />
+                Monitorowanie aktywne
+              </label>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={editSaving}
+                onClick={() => setEditOpen(false)}
+                className="rounded-xl px-4 py-2 text-sm text-zinc-400 hover:text-white disabled:opacity-50"
+              >
+                Anuluj
+              </button>
+              <button
+                type="submit"
+                disabled={editSaving}
+                className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:opacity-50"
+              >
+                {editSaving ? "Zapisywanie…" : "Zapisz zmiany"}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }

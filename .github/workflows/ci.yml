@@ -42,3 +42,21 @@ jobs:
         run: npm run build
       - name: Test
         run: npm test
+
+  # After green CI, squash-merge Dependabot PRs so dependencies stay current (same-repo PRs only).
+  dependabot-merge:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request' &&
+      github.base_ref == 'main' &&
+      github.actor == 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge Dependabot pull request
+        run: gh pr merge "${{ github.event.pull_request.number }}" --squash --repo "${{ github.repository }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
