@@ -76,20 +76,9 @@ docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.1
 
 ## Dependabot
 
-Workflow [**Scalanie Dependabot**](./.github/workflows/dependabot-merge.yml) uruchamia się tylko przy **`push` na gałęzie `dependabot/**`** (Dependabot aktualizuje PR). **Nie uruchamia się** przy zwykłym pushu na `main` ani przy otwarciu zwykłego PR do `main` — dlatego nie powinien już generować maili „No jobs were run” przy Twoich commitach (wcześniejszy `pull_request_target` + `branches: [main]` odpalał się przy każdym PR do `main`, a warunek `if` na jobie odrzucał wszystko poza Dependabotem).
+Konfiguracja w [`.github/dependabot.yml`](./.github/dependabot.yml): Dependabot otwiera pull requesty (npm, pip, GitHub Actions). **Nie ma już automatycznego scalania** — po zielonym CI przejrzyj zmiany i scal PR ręcznie w GitHubie (albo cherry-pick). Jeśli wcześniej dodałeś secret **`DEPENDABOT_MERGE_TOKEN`** tylko pod auto-merge, możesz go usunąć w **Settings → Secrets and variables → Actions**.
 
-Skrypt w pętli czeka na **`mergeStateStatus: CLEAN`** (m.in. zielona **Integracja**). W **Branch protection** dla `main` ustaw wymagany status check z [`ci.yml`](./.github/workflows/ci.yml) (np. joby backend / frontend albo nazwa workflowu **Integracja** — tak, jak GitHub pokazuje w ustawieniach ochrony gałęzi).
-
-**Ustawienia GitHub (wymagane do automatycznego merge):**
-
-1. Repozytorium → **Settings** → **Actions** → **General** → **Workflow permissions**: włącz **Read and write permissions**.
-2. Ten sam ekran: włącz **Allow GitHub Actions to create and approve pull requests**, jeśli branch protection tego wymaga.
-
-**Błąd GraphQL o `workflows` przy merge PR zmieniającym np. `release.yml`:** czasem `GITHUB_TOKEN` nie wystarcza. Utwórz **fine-grained PAT** (lub classic: `repo` + `workflow`) dla tego repozytorium z uprawnieniami **Contents**, **Pull requests**, **Workflows** (zapis) i zapisz jako secret **`DEPENDABOT_MERGE_TOKEN`** — workflow go użyje, gdy jest ustawiony.
-
-Jeśli merge się nie uda (recenzje, **branch protection**), dostosuj ustawienia albo wyłącz workflow **Scalanie Dependabot**.
-
-**Mniej maili od GitHub ogólnie:** profil → **Settings** → **Notifications** → **Actions** — możesz ograniczyć powiadomienia tylko do nieudanych workflowów.
+**Mniej maili od Actions:** profil → **Settings** → **Notifications** → **Actions** — możesz ograniczyć powiadomienia (np. tylko nieudane workflowy).
 
 ## Testy
 

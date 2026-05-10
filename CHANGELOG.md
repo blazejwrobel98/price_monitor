@@ -8,7 +8,6 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 - Automatyczne migracje bazy (**Alembic**): przy starcie aplikacji wykonywane jest `upgrade` do najnowszego schematu; istniejące bazy utworzone wcześniej przez `create_all` są jednorazowo „stemplowane”, żeby nie duplikować tabel.
 - Panel boczny (zwijany do samych ikon, stan w `localStorage`) oraz strona **Ustawienia**: pobieranie kopii SQLite, wgrywanie i przywracanie bazy.
-- Workflow **Scalanie Dependabot** (`push` na `dependabot/**`, oczekiwanie na `mergeStateStatus: CLEAN`): squash merge PR Dependabot do `main` po zielonej **Integracji** (bez `pull_request_target` na całe PR do `main` — eliminuje maile „No jobs were run”).
 - Edycja monitorowanego produktu ze strony szczegółów (modal, zapis przez `PATCH /api/products/{id}`).
 - Wersja aplikacji w panelu bocznym (z `package.json` / build Vite), nad przyciskiem zwijania.
 - Skrócony podpis adresu URL na stronie produktu (pełny link w `title` / `href`).
@@ -17,12 +16,13 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 - Zależności frontendu i lockfile: React 19, React Router 7, Vitest 4, jsdom 29 (zbiorczo z otwartych PR Dependabot).
 - Akcje Docker w workflow release: `setup-buildx-action@v4`, `metadata-action@v6`, `build-push-action@v7`.
-- Scalanie Dependabot: z **`pull_request_target`** na **`push: dependabot/**`** — workflow nie startuje przy zwykłych PR/commitach na `main` (naprawa maili „No jobs were run”).
+
+### Usunięto
+
+- Workflow **Scalanie Dependabot** (`dependabot-merge.yml`) i cała automatyzacja scalania PR Dependabot — powiadomienia GitHub były z tym związane; PR-y Dependabot scalasz ręcznie po zielonym CI.
 
 ### Naprawiono
 
-- Integracja: merge Dependabot przeniesiony do osobnego workflow **`workflow_run`** ([`dependabot-merge.yml`](./.github/workflows/dependabot-merge.yml)), bo przy zdarzeniu `pull_request` od Dependabot `GITHUB_TOKEN` jest tylko do odczytu i GitHub i tak odrzucał merge zmieniających `.github/workflows/` (błąd GraphQL o braku uprawnienia `workflows`).
-- Scalanie Dependabot: obsługa secretu **`DEPENDABOT_MERGE_TOKEN`** (PAT z zapisem do workflowów) — używany zamiast `GITHUB_TOKEN`, gdy GraphQL nadal odrzuca merge PR zmieniających `.github/workflows/`.
 - Wyświetlanie adresu URL: zawsze skrócona etykieta bez `https://` (host + ścieżka), poprawne `min-w-0` / `truncate` w układzie flex; testy dla `formatUrlLabel`.
 - Dodano zależność **python-multipart** (wymagana przez FastAPI przy uploadzie kopii bazy w CI i produkcji).
 - Harmonogram (APScheduler): przyrostowa synchronizacja jobów zamiast `remove_all_jobs()` — zapis jednego produktu nie odracał już sprawdzeń pozostałych o pełny interwał; pierwsze uruchomienie nowego joba w krótkim oknie (rozłożone w czasie); większy `misfire_grace_time` przy długich interwałach.
