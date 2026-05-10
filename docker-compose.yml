@@ -1,0 +1,15 @@
+services:
+  price-monitor:
+    build: .
+    image: price-monitor:0.0.1
+    ports:
+      - "8080:8080"
+    environment:
+      DATA_DIR: /data
+      SCHEDULER_ENABLED: "true"
+    volumes:
+      - price_monitor_data:/data
+    restart: unless-stopped
+
+volumes:
+  price_monitor_data:
