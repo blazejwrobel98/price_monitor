@@ -3,17 +3,35 @@ from sqlalchemy.orm import Session
 
 from price_monitor import crud
 from price_monitor.api.deps import get_db, get_settings, reschedule_jobs
+from price_monitor.models import Product
 from price_monitor.schemas import (
     CheckResult,
     PriceRecordRead,
     ProductCreate,
     ProductListItem,
-    ProductRead,
     ProductUpdate,
 )
 from price_monitor.services.checker import run_check_for_product
 
 router = APIRouter(prefix="/products", tags=["products"])
+
+
+def _product_list_item(db: Session, p: Product) -> ProductListItem:
+    latest = crud.latest_records_for_products(db, [p.id])
+    r = latest.get(p.id)
+    return ProductListItem(
+        id=p.id,
+        name=p.name,
+        url=p.url,
+        price_selector=p.price_selector,
+        currency=p.currency,
+        check_interval_minutes=p.check_interval_minutes,
+        is_active=p.is_active,
+        created_at=p.created_at,
+        last_error=p.last_error,
+        last_price=r.price if r else None,
+        last_checked_at=r.checked_at if r else None,
+    )
 
 
 @router.get("", response_model=list[ProductListItem])
@@ -41,7 +59,7 @@ def list_products(db: Session = Depends(get_db)):
     return out
 
 
-@router.post("", response_model=ProductRead, status_code=201)
+@router.post("", response_model=ProductListItem, status_code=201)
 def create_product(
     body: ProductCreate,
     db: Session = Depends(get_db),
@@ -56,18 +74,18 @@ def create_product(
         check_interval_minutes=body.check_interval_minutes,
         is_active=body.is_active,
     )
-    return p
+    return _product_list_item(db, p)
 
 
-@router.get("/{product_id}", response_model=ProductRead)
+@router.get("/{product_id}", response_model=ProductListItem)
 def get_product(product_id: int, db: Session = Depends(get_db)):
     p = crud.get_product(db, product_id)
     if not p:
         raise HTTPException(status_code=404, detail="Product not found")
-    return p
+    return _product_list_item(db, p)
 
 
-@router.patch("/{product_id}", response_model=ProductRead)
+@router.patch("/{product_id}", response_model=ProductListItem)
 def patch_product(
     product_id: int,
     body: ProductUpdate,
@@ -78,7 +96,8 @@ def patch_product(
     if not p:
         raise HTTPException(status_code=404, detail="Product not found")
     data = body.model_dump(exclude_unset=True)
-    return crud.update_product(db, p, **data)
+    p = crud.update_product(db, p, **data)
+    return _product_list_item(db, p)
 
 
 @router.delete("/{product_id}", status_code=204)

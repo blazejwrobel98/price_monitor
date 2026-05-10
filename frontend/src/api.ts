@@ -31,6 +31,11 @@ async function parseJson<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export async function fetchProduct(id: number): Promise<Product> {
+  const res = await fetch(`${base}/api/products/${id}`);
+  return parseJson(res);
+}
+
 export async function fetchProducts(): Promise<Product[]> {
   const res = await fetch(`${base}/api/products`);
   return parseJson(res);

@@ -13,7 +13,7 @@ import {
   checkNow,
   deleteProduct,
   fetchHistory,
-  fetchProducts,
+  fetchProduct,
   updateProduct,
   type PriceRecord,
   type Product,
@@ -54,8 +54,7 @@ export function ProductPage({ id }: { id: number }) {
     setLoading(true);
     setError(null);
     try {
-      const products = await fetchProducts();
-      const p = products.find((x) => x.id === id) ?? null;
+      const p = await fetchProduct(id);
       setProduct(p);
       const h = await fetchHistory(id);
       setHistory(h);
