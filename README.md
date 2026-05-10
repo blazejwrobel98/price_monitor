@@ -76,7 +76,7 @@ docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.1
 
 ## Dependabot
 
-Po zielonym przebiegu workflowu **Integracja** ([`ci.yml`](./.github/workflows/ci.yml)) workflow [**Scalanie Dependabot**](./.github/workflows/dependabot-merge.yml) (zdarzenie `workflow_run`) scala (squash) otwarte pull requesty od `dependabot[bot]` do `main`. Uruchamia się w osobnym jobie niż testy na samym PR Dependabot — tam `GITHUB_TOKEN` jest tylko do odczytu, więc merge z tego samego przebiegu nie mógłby zmieniać plików w `.github/workflows/`.
+Po zielonym przebiegu workflowu **Integracja** ([`ci.yml`](./.github/workflows/ci.yml)) workflow [**Scalanie Dependabot**](./.github/workflows/dependabot-merge.yml) (zdarzenie `workflow_run`, tylko gdy CI zakończyło się na gałęzi `dependabot/**`) scala (squash) otwarte pull requesty od `dependabot[bot]` do `main`. Dzięki temu workflow nie startuje po zwykłym pushu na `main` — mniej zbędnych powiadomień e-mail od GitHub. Uruchamia się w osobnym jobie niż testy na samym PR Dependabot — tam `GITHUB_TOKEN` jest tylko do odczytu, więc merge z tego samego przebiegu nie mógłby zmieniać plików w `.github/workflows/`.
 
 **Ustawienia GitHub (wymagane do automatycznego merge):**
 

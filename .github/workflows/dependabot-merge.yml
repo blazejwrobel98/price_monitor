@@ -7,6 +7,9 @@ on:
   workflow_run:
     workflows: [Integracja]
     types: [completed]
+    # Tylko PR-y Dependabot (gałąź head). Bez tego workflow startował po każdym CI → maile przy każdym commicie.
+    branches:
+      - "dependabot/**"
 
 jobs:
   merge:
