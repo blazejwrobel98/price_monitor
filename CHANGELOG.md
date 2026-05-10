@@ -4,6 +4,10 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 ## [Unreleased]
 
+### Zmieniono
+
+- Frontend: zbiorcza aktualizacja z PR Dependabot — `lucide-react` ^1.14, `recharts` ^3.8, `typescript` ~6.0, `tailwindcss` ^4.3 z `@tailwindcss/vite` (usunięty `postcss.config.js`), `vite` ^6.4, `@vitejs/plugin-react` ^5.2 (wariant **6.x** z PR wymaga Vite 8 — do osobnej migracji). Usunięto błędną zależność `price-monitor: file:..` z `frontend/package.json`.
+
 ## [0.0.2] - 2026-05-11
 
 ### Dodano

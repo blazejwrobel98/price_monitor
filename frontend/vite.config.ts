@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 
@@ -23,6 +24,7 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
     plugins: [
+      tailwindcss(),
       react(),
       {
         name: "price-monitor-log-api-proxy",
