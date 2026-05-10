@@ -2,6 +2,8 @@
 
 Self‑hosted monitor cen produktów z **historią sprawdzeń** i nowoczesnym panelem (React). Dane trzymane są lokalnie w **SQLite** (domyślnie plik w katalogu `DATA_DIR`).
 
+**Aktualizacja:** przy każdym starcie serwera uruchamiane są migracje Alembic do aktualnego schematu — **nie trzeba ręcznie dotykać pliku bazy** przy podmianie obrazu / wersji (poza standardowym backupem na wszelki wypadek).
+
 **Wersja:** `0.0.1` (zobacz plik [`VERSION`](./VERSION) oraz [`CHANGELOG.md`](./CHANGELOG.md)).
 
 ## Możliwości

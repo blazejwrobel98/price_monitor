@@ -12,7 +12,7 @@ from price_monitor.api.health import router as health_router
 from price_monitor.api.products import router as products_router
 from price_monitor.config import Settings
 from price_monitor.db import make_engine, make_session_factory
-from price_monitor.models import Base
+from price_monitor.migrate import run_database_migrations
 from price_monitor.services.scheduler import schedule_product_jobs
 
 log = logging.getLogger(__name__)
@@ -24,8 +24,8 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 async def lifespan(app: FastAPI):
     settings = Settings()
     settings.data_dir.mkdir(parents=True, exist_ok=True)
+    run_database_migrations(settings)
     engine = make_engine(settings)
-    Base.metadata.create_all(bind=engine)
     session_factory = make_session_factory(engine)
     scheduler = BackgroundScheduler(timezone="UTC")
 

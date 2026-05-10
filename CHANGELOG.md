@@ -2,6 +2,12 @@
 
 Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/), a wersjonowanie o [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [Unreleased]
+
+### Dodano
+
+- Automatyczne migracje bazy (**Alembic**): przy starcie aplikacji wykonywane jest `upgrade` do najnowszego schematu; istniejące bazy utworzone wcześniej przez `create_all` są jednorazowo „stemplowane”, żeby nie duplikować tabel.
+
 ## [0.0.1] - 2026-05-10
 
 ### Dodano

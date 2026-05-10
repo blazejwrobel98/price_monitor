@@ -18,6 +18,8 @@ RUN pip install --upgrade pip
 
 COPY backend/pyproject.toml backend/README.md ./
 COPY backend/price_monitor ./price_monitor
+COPY backend/alembic.ini ./alembic.ini
+COPY backend/alembic ./alembic
 RUN pip install .
 
 COPY --from=frontend /src/dist ./price_monitor/static
