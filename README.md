@@ -83,7 +83,7 @@ docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.2
 
 - Numer wersji trzymamy w [`VERSION`](./VERSION) oraz w `backend/pyproject.toml` i `frontend/package.json` (oraz `package-lock.json`).
 - Zmiany opisujemy w [`CHANGELOG.md`](./CHANGELOG.md).
-- Tag Git `v0.0.2` + workflow [`.github/workflows/release.yml`](./.github/workflows/release.yml) buduje i publikuje obraz do **GitHub Container Registry** (`ghcr.io/<właściciel>/<repo>` w małych literach).
+- Tag Git `v0.0.2` + workflow [`.github/workflows/release.yml`](./.github/workflows/release.yml) buduje i publikuje obraz do **GitHub Container Registry** (`ghcr.io/<właściciel>/<repo>` w małych literach). Przy każdym tagu wersji workflow nadaje też tag **`latest`** (obok semver, np. `0.0.2`) — wygodnie: `docker pull ghcr.io/<właściciel>/<repo>:latest`.
 
 ## Dependabot
 
