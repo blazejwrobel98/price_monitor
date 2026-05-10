@@ -76,9 +76,16 @@ docker run --rm -p 8080:8080 -v price_data:/data price-monitor:0.0.1
 
 ## Dependabot
 
-Po zielonym CI job **`dependabot-merge`** w [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) scala (squash) pull requesty od `dependabot[bot]` do `main`, żeby zależności nie stały w kolejce ręcznie.
+Po zielonym przebiegu workflowu **Integracja** ([`ci.yml`](./.github/workflows/ci.yml)) workflow [**Scalanie Dependabot**](./.github/workflows/dependabot-merge.yml) (zdarzenie `workflow_run`) scala (squash) otwarte pull requesty od `dependabot[bot]` do `main`. Uruchamia się w osobnym jobie niż testy na samym PR Dependabot — tam `GITHUB_TOKEN` jest tylko do odczytu, więc merge z tego samego przebiegu nie mógłby zmieniać plików w `.github/workflows/`.
 
-Jeśli merge się nie uda (np. wymagane recenzje, **branch protection**), dostosuj ustawienia repozytorium albo wyłącz ten job. Job ma uprawnienia `contents`, `pull-requests` oraz **`workflows: write`** — bez tego ostatniego GitHub odrzuca merge PR-ów, które zmieniają pliki w `.github/workflows/` (np. podbicie akcji Docker w `release.yml`).
+**Ustawienia GitHub (wymagane do automatycznego merge):**
+
+1. Repozytorium → **Settings** → **Actions** → **General** → **Workflow permissions**: włącz **Read and write permissions** (inaczej job nie dostanie zapisu nawet z `permissions:` w pliku YAML).
+2. Ten sam ekran: włącz **Allow GitHub Actions to create and approve pull requests**, jeśli masz reguły ochrony gałęzi wymagające zatwierdzenia przez Actions.
+
+**Błąd GraphQL o `workflows` przy merge PR zmieniającego np. `release.yml`:** czasem `GITHUB_TOKEN` i tak nie wystarcza (polityka konta / organizacji). Utwórz **fine-grained PAT** (lub classic z zakresem `repo` + `workflow`) z dostępem tylko do tego repozytorium i uprawnieniami: **Contents**, **Pull requests** oraz **Workflows** (zapis). Zapisz go jako secret repozytorium **`DEPENDABOT_MERGE_TOKEN`** — workflow **Scalanie Dependabot** użyje go zamiast `GITHUB_TOKEN`, gdy secret jest ustawiony.
+
+Jeśli merge się nie uda (np. recenzje, **branch protection**), dostosuj ustawienia repozytorium albo usuń/wyłącz workflow **Scalanie Dependabot**.
 
 ## Testy
 

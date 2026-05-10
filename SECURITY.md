@@ -1,4 +1,4 @@
-# Security
+# Bezpieczeństwo
 
 Jeśli znajdziesz podatność, zgłoś ją proszę **prywatnie** (nie przez publiczny issue), opisując kroki odtworzenia i wersję obrazu / commita.
 

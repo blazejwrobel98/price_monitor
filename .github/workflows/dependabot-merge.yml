@@ -1,0 +1,54 @@
+# PR-y Dependabot uruchamiają workflow Integracja z GITHUB_TOKEN tylko do odczytu — merge w tym samym
+# workflow nie może zmieniać .github/workflows nawet przy workflows: write.
+# Ten workflow startuje po zakończeniu Integracji (workflow_run) i dostaje zwykły token z zapisem.
+name: Scalanie Dependabot
+
+on:
+  workflow_run:
+    workflows: [Integracja]
+    types: [completed]
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    permissions:
+      contents: write
+      pull-requests: write
+      workflows: write
+    steps:
+      - name: Squash merge PR Dependabot
+        env:
+          TOKEN_PAT: ${{ secrets.DEPENDABOT_MERGE_TOKEN }}
+          TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${TOKEN_PAT}" ]; then
+            export GH_TOKEN="${TOKEN_PAT}"
+            echo "::notice::Scalanie: użyto secretu DEPENDABOT_MERGE_TOKEN (PAT z uprawnieniem do workflowów)."
+          else
+            export GH_TOKEN="${TOKEN_GITHUB}"
+            echo "::notice::Scalanie: użyto GITHUB_TOKEN. Jeśli merge pada z błędem o braku uprawnienia workflows, ustaw secret DEPENDABOT_MERGE_TOKEN (PAT) — opis w README, sekcja Dependabot."
+          fi
+          REPO="${{ github.repository }}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          OWNER="${REPO%%/*}"
+          PR_JSON=$(gh pr list --repo "$REPO" --head "${OWNER}:${BRANCH}" --state open --json number,author,isDraft --jq '.[0]')
+          if [ "$PR_JSON" = "null" ] || [ -z "$PR_JSON" ]; then
+            echo "Brak otwartego PR dla gałęzi ${BRANCH} — pomijam."
+            exit 0
+          fi
+          AUTHOR=$(echo "$PR_JSON" | jq -r '.author.login')
+          if [ "$AUTHOR" != "dependabot[bot]" ]; then
+            echo "Autor PR to ${AUTHOR}, nie Dependabot — pomijam."
+            exit 0
+          fi
+          if [ "$(echo "$PR_JSON" | jq -r '.isDraft')" = "true" ]; then
+            echo "Szkic PR — pomijam."
+            exit 0
+          fi
+          NUMBER=$(echo "$PR_JSON" | jq -r '.number')
+          gh pr merge "$NUMBER" --squash --repo "$REPO"
