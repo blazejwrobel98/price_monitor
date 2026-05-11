@@ -4,6 +4,20 @@ Ten plik dokumentuje istotne zmiany w projekcie. Format opiera się o [Keep a Ch
 
 ## [Unreleased]
 
+## [0.0.4] - 2026-05-11
+
+### Naprawiono
+
+- Frontend: pusta lista produktów mimo danych w bazie — cache listy (45 s) mógł trzymać `[]` z wcześniejszej odpowiedzi API; przy każdym ładowaniu dashboardu wymuszane jest świeże `GET /api/products` (`fetchProducts({ force: true })`); po udanym przywróceniu kopii SQLite unieważniany jest cache listy.
+
+### Zmieniono
+
+- Wykres ceny na stronie produktu: sąsiednie w czasie odczyty o tej samej cenie (co do grosza) są skracane do odcinka wykresu; przy liczbie punktów widać też liczbę rekordów `ok` w historii, gdy się różni.
+
+### Dodano
+
+- `docker-compose.ghcr.yml` oraz rozszerzony opis w README: różnica rejestru `ghcr.io` vs Docker Hub, typowy błąd timeoutu do `ghcr.io:443`, obejścia (build lokalny, `docker save` / `docker load`).
+
 ## [0.0.3] - 2026-05-10
 
 ### Naprawiono
