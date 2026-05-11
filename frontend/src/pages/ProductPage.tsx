@@ -21,6 +21,7 @@ import {
 } from "../api";
 import { formatLocalDateTime, parseBackendInstant } from "../formatDateTime";
 import { formatUrlLabel } from "../formatUrl";
+import { collapseSamePriceRunsForChart, type ChartPoint } from "../chartCollapse";
 
 function formatMoney(v: string | number | null, currency: string) {
   if (v === null || v === undefined) return "—";
@@ -106,14 +107,20 @@ export function ProductPage({ id }: { id: number }) {
     void load();
   }, [id]);
 
+  const rawOkCount = useMemo(
+    () => history.filter((r) => r.status === "ok" && r.price !== null).length,
+    [history],
+  );
+
   const chartData = useMemo(() => {
     const ok = history.filter((r) => r.status === "ok" && r.price !== null);
     const asc = [...ok].reverse();
-    return asc.map((r) => ({
+    const series: ChartPoint[] = asc.map((r) => ({
       t: parseBackendInstant(r.checked_at).getTime(),
       label: formatLocalDateTime(r.checked_at),
       price: typeof r.price === "string" ? Number(r.price) : Number(r.price),
     }));
+    return collapseSamePriceRunsForChart(series);
   }, [history]);
 
   const onCheck = async () => {
@@ -250,7 +257,12 @@ export function ProductPage({ id }: { id: number }) {
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 shadow-xl backdrop-blur">
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-zinc-100">Historia ceny</h2>
-          <span className="text-xs text-zinc-500">Punkty: {chartData.length}</span>
+          <span className="text-xs text-zinc-500" title="Wykres skraca ciągi tej samej ceny do odcinka; pełna lista w tabeli poniżej.">
+            Punkty: {chartData.length}
+            {rawOkCount > chartData.length ? (
+              <span className="text-zinc-600"> · {rawOkCount} rekordów ok</span>
+            ) : null}
+          </span>
         </div>
         {chartData.length === 0 ? (
           <p className="py-10 text-center text-sm text-zinc-500">
