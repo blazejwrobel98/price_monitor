@@ -36,7 +36,7 @@ export function Dashboard() {
     const hadListCache = getProductsListIfCached() !== null;
     if (!hadListCache) setLoading(true);
     try {
-      setItems(await fetchProducts());
+      setItems(await fetchProducts({ force: true }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Błąd ładowania");
     } finally {

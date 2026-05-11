@@ -54,9 +54,11 @@ export async function fetchProduct(id: number): Promise<Product> {
   return parseJson(res);
 }
 
-export async function fetchProducts(): Promise<Product[]> {
-  const hit = peekProductsListCache();
-  if (hit) return hit;
+export async function fetchProducts(options?: { force?: boolean }): Promise<Product[]> {
+  if (!options?.force) {
+    const hit = peekProductsListCache();
+    if (hit) return hit;
+  }
   const res = await fetch(`${base}/api/products`);
   const data = await parseJson<Product[]>(res);
   productsListCache = { data, at: Date.now() };
@@ -185,6 +187,7 @@ export async function restoreBackupFile(file: File): Promise<void> {
   if (!res.ok) {
     throw new Error(await errorBody(res));
   }
+  invalidateProductsListCache();
 }
 
 export type NotificationsSettings = {
