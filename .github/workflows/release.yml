@@ -13,7 +13,7 @@ jobs:
   image:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Nazwa obrazu (małe litery pod GHCR)
         run: |
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: image
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Utwórz GitHub Release dla tagu
         uses: softprops/action-gh-release@v2
